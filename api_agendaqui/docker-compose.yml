@@ -1,0 +1,12 @@
+version: '3.9'
+services: 
+    database:
+        image: mysql
+        container_name: sistema_agendaqui
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: 'abc'
+            MYSQL_DATABASE: 'agendaqui'
+        ports:
+            - '3306:3306'

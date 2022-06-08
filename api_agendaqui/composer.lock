@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4a16c3c541bd99241cab1c21ce8e83ac",
+    "content-hash": "214a9e5b4ab9a0351e88eb63f74a50d8",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -121,6 +121,55 @@
                 }
             ],
             "time": "2021-08-15T20:50:18+00:00"
+        },
+        {
+            "name": "comtele/comtele_sdk",
+            "version": "1.1.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/comtele/comtele-php-sdk.git",
+                "reference": "e1b2b7009dbe932024285d4388d17b0f35a1649c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/comtele/comtele-php-sdk/zipball/e1b2b7009dbe932024285d4388d17b0f35a1649c",
+                "reference": "e1b2b7009dbe932024285d4388d17b0f35a1649c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Comtele\\": "Comtele/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Diego Vieira",
+                    "email": "desenvolvimento@comtele.com.br"
+                }
+            ],
+            "description": "SDK para envio de mensagens de texto usando a plataforma Comtele",
+            "homepage": "https://docs.comtele.com.br",
+            "keywords": [
+                "api",
+                "comtele",
+                "rest",
+                "sdk",
+                "sms",
+                "telephony"
+            ],
+            "support": {
+                "issues": "https://github.com/comtele/comtele-php-sdk/issues",
+                "source": "https://github.com/comtele/comtele-php-sdk/tree/v1.1.6"
+            },
+            "time": "2018-08-24T17:38:43+00:00"
         },
         {
             "name": "dflydev/dot-access-data",

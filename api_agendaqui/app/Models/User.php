@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
@@ -21,7 +21,7 @@ class User extends Authenticatable
         'foto_do_perfil',
         'email',
         'telefone',
-        'senha',
+        'password',
     ];
 
     public function rules() {
@@ -30,7 +30,7 @@ class User extends Authenticatable
             'foto_do_perfil' => 'file|mimes:png,jpeg,jpg',
             'email' => 'required|email|unique:users,email,'.$this->id,
             'telefone' => 'required|size:14|unique:users,telefone,'.$this->id,
-            'senha' => 'required|min:4'
+            'password' => 'required|min:4'
         ];
     }
 
@@ -40,7 +40,7 @@ class User extends Authenticatable
             'nome.min' => 'O campo nome deve ter no mínimo 2 caractere',
             'telefone.size' => 'Digite um número válido',
             'email' => 'Email incorreto',
-            'senha.min' => 'A senha deve ter no mínimo 4 caracteres',
+            'password.min' => 'A senha deve ter no mínimo 4 caracteres',
             'mimes' => 'O campo :attribute deve ser do tipo png, jpeg ou jpg',
             'email.unique' => 'O email digitado já existe',
             'telefone.unique' => 'O telefone digitado já existe'
@@ -53,7 +53,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'senha',
+        'password',
         'remember_token',
     ];
 
@@ -65,4 +65,24 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+     /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }

@@ -51,12 +51,12 @@ class UserController extends Controller
             return $numeroAleatorio;
         }
         
-        $this->user::create([
+        $this->user->create([
             'nome' => $request->nome,
             'email' => $request->email,
             'telefone' => $request->telefone,
-            'senha' => bcrypt($request->senha)
-        ]);
+            'password' => bcrypt($request->password)
+
         return response()->json(['sucesso' => 'Usuário criado com sucesso'], 201);
     }
 

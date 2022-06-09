@@ -48,7 +48,6 @@ class UserController extends Controller
                 "Código de verificação AGENDAQUI: " .$numeroAleatorio,      // Content: Conteudo da mensagem a ser enviada.
                 [$numeroTelefone],  // Receivers: Numero de telefone que vai ser enviado o SMS.
             );
-
             return $numeroAleatorio;
         }
         
@@ -57,7 +56,7 @@ class UserController extends Controller
             'email' => $request->email,
             'telefone' => $request->telefone,
             'password' => bcrypt($request->password)
-        ]);
+
         return response()->json(['sucesso' => 'Usuário criado com sucesso'], 201);
     }
 

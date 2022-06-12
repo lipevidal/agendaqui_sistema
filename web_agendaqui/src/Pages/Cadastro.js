@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import InputMask from "react-input-mask";
+import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons'
+
+const element = <FontAwesomeIcon icon={faArrowLeftLong} className='i-seta'/>
+
 
 const ContainerCadastro = styled.div`
     background-color: #141f36;
@@ -19,8 +25,16 @@ const ContainerCadastro = styled.div`
         p {
             text-align: center;
         }
+        p.codigo-incorreto {
+          margin-top: 2px;
+          margin-left: 5px;
+          margin-bottom: 18px;
+          font-size: 0.8em;
+          text-align: left;
+          color: red;
+          height: 15px;
+        }
         input {
-            margin: 10px 10px 20px 10px;
             width: 100px;
             font-size: 1.1em;
             text-align: center;
@@ -33,14 +47,24 @@ const ContainerCadastro = styled.div`
             border: none;
         }
     }
-    .containerCadastro {
+    .form {
         text-align: center;
+        .icone {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          text-align: left;
+          .i-seta {
+            color: #ececf6;
+            font-size: 2em;
+          }
+        }
         .box-inputs {
         display: flex;
         flex-direction: column;
         padding-bottom: 25px;
+        position: relative;
         input {
-            margin: 10px;
             font-size: 1.1em;
             width: 250px;
             padding: 10px 15px;
@@ -50,7 +74,15 @@ const ContainerCadastro = styled.div`
             outline: none;
             color: #ececf6;
             border: none;
-            }
+          }
+        }
+        p{
+          margin-top: 1px;
+          margin-left: 5px;
+          font-size: 0.8em;
+          text-align: left;
+          color: red;
+          height: 15px;
         }
     }
     button {
@@ -76,9 +108,13 @@ export default function Cadastro() {
     const [mensagemErro, setMensagemErro] = useState('')
     const [paginaCodigo, setPaginaCodigo] = useState(false)
     const [verificaCodigo, setVerificaCodigo] = useState('')
+    const [erroEmail, setErroEmail] = useState('')
+    const [erroNome, setErroNome] = useState('')
+    const [erroTelefone, setErroTelefone] = useState('')
+    const [erroSenha, setErroSenha] = useState('')
 
     const EnviarCodigo = () => {
-        setMensagemErro('')
+      setMensagemErro('')
       if(senha !== repitaSenha) {
         setMensagemErro('As senhas não correspondem')
       } else {
@@ -86,7 +122,7 @@ export default function Cadastro() {
           nome: nome,
           email: email,
           telefone: telefone,
-          senha: senha,
+          password: senha,
           codigo: codigo
         }
         axios.post('http://localhost:8000/api/user', body, {
@@ -94,12 +130,17 @@ export default function Cadastro() {
             Accept : 'application/json'
           }
         }).then((response) => {
+          console.log(response.data)
           setCodigo(response.data)
           //let tel = telefone.replace(/[^0-9]/g,'')
           setPaginaCodigo(true)
           
         }).catch((err) => {
-          console.log(err)
+          console.log(err.response.data.errors)
+          setErroEmail(err.response.data.errors.email)
+          setErroNome(err.response.data.errors.nome)
+          setErroTelefone(err.response.data.errors.telefone)
+          setErroSenha(err.response.data.errors.password)
         })
       }
     }
@@ -131,26 +172,32 @@ export default function Cadastro() {
 
     const pegarNome = (event) => {
         setNome(event.target.value)
+        setErroNome('')
     }
 
     const pegarTelefone = (event) => {
         setTelefone(event.target.value)
+        setErroTelefone('')
     }
 
     const pegarEmail = (event) => {
         setEmail(event.target.value)
+        setErroEmail('')
     }
 
     const pegarSenha = (event) => {
         setSenha(event.target.value)
+        setErroSenha('')
     }
 
     const pegarRepitaSenha = (event) => {
         setRepitaSenha(event.target.value)
+        setMensagemErro('')
     }
 
     const pegarVerificacaoCodigo = (event) => {
         setVerificaCodigo(event.target.value)
+        setMensagemErro('')
     }
 
   return (
@@ -159,21 +206,28 @@ export default function Cadastro() {
             <div className="boxCodigo">
                 <p>Digite o código enviado para o número: <br />{telefone}</p>
                 <InputMask mask="999999" value={verificaCodigo} onChange={pegarVerificacaoCodigo} autoComplete="none"/>
-                <button onClick={cadastrarUsuario}>Enviar</button>
                 <p className="codigo-incorreto">{mensagemErro}</p>
+                <button onClick={cadastrarUsuario}>Enviar</button>
             </div> 
             : 
-            <div className='containerCadastro'>
+            <div className='form'>
+                <Link to='/login' className='icone'>
+                  {element}
+                </Link>
                 <h1>CADASTRE-SE</h1>
                 <div className='box-inputs'>
                     <input value={nome} onChange={pegarNome} placeholder='Nome' autoComplete='none'/>
+                    <p>{erroNome}</p>
                     <InputMask mask="(99)99999-9999" value={telefone} onChange={pegarTelefone} placeholder='Telefone' autoComplete='none'/>
+                    <p>{erroTelefone}</p>
                     <input value={email.trim()} onChange={pegarEmail} placeholder='Email' autoComplete='none'/>
+                    <p>{erroEmail}</p>
                     <input type="password" value={senha} onChange={pegarSenha} placeholder='Senha' autoComplete='none'/>
+                    <p>{erroSenha}</p>
                     <input type="password" value={repitaSenha} onChange={pegarRepitaSenha} placeholder='Repita sua senha' autoComplete='none'/>
+                    <p>{mensagemErro}</p>
                 </div>
                 <button onClick={EnviarCodigo}>Enviar</button>
-                <p>{mensagemErro}</p>
             </div>
         }
     </ContainerCadastro>

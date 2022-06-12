@@ -37,6 +37,7 @@ class User extends Authenticatable implements JWTSubject
     public function feedback() {
         return [
             'required' => 'O campo :attribute é obrigatório',
+            'password.required' => 'O campo senha é obrigatório',
             'nome.min' => 'O campo nome deve ter no mínimo 2 caractere',
             'telefone.size' => 'Digite um número válido',
             'email' => 'Email incorreto',

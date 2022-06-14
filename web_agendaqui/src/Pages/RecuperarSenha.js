@@ -113,6 +113,7 @@ export default function RecuperarSenha() {
     const [paginaNovaSenha, setPaginaNovaSenha] = useState(false)
     const [senha, setSenha] = useState('')
     const [senhaRepetida, setSenhaRepetida] = useState('')
+    const [numeroAleatorio, setNumeroAleatorio] = useState('')
 
     const buscarTelefone = () => {
         axios.get(`http://localhost:8000/api/user?filtroTelefone=telefone:=:${telefone}`, {
@@ -132,6 +133,8 @@ export default function RecuperarSenha() {
         axios.get(`http://localhost:8000/api/user?filtroEmail=email:=:${email}`, {
         }).then((response) => {
             if(response.data[0]) {
+                console.log('Deu certo, encontrei o email que é:')
+                console.log(response.data[0].email)
                 setUsuario(response.data[0])
                 gerarCodigoEmail()
             } else {
@@ -164,6 +167,21 @@ export default function RecuperarSenha() {
 
     const gerarCodigoEmail = () => {
         console.log(email)
+        console.log('Vou gerar o código que é:')
+        let numeroAleatorio = Math.floor(Math.random() * (999999 - 111111)) + 111111
+        console.log(numeroAleatorio)
+        axios.get(`http://localhost:8000/api/envio-email?email=${email}&numeroAleatorio=${numeroAleatorio}`, {
+          headers: {
+            Accept: 'application/json'
+          }
+        }).then((response) => {
+            console.log('Enviei o email')
+          console.log(response.data)
+          setCodigo(numeroAleatorio)
+          setTemplate(false)
+        }).catch((err) => {
+          console.log(err)
+        })
     }
 
     const confirmarCodigo = () => {
@@ -171,7 +189,6 @@ export default function RecuperarSenha() {
         if(confirmacaoCodigo != codigo) {
             setErro('Código incorreto')
         } else {
-            // Mudar de página
             setPaginaNovaSenha(true)
         }
     }
@@ -255,7 +272,7 @@ export default function RecuperarSenha() {
             </div>
             :
             <Codigos 
-                numeroTelefone={usuario.telefone}
+                numeroTelefoneEmail={usuario.telefone}
                 mensagemErro={erro}
                 atualizarSenha={() => confirmarCodigo()}
                 verificacaoCodigo={pegarVerificacaoCodigo}
@@ -288,7 +305,7 @@ export default function RecuperarSenha() {
             </div>
             :
             <Codigos 
-                numeroTelefone={usuario.telefone}
+                numeroTelefoneEmail={usuario.email}
                 mensagemErro={erro}
                 atualizarSenha={() => confirmarCodigo()}
                 verificacaoCodigo={pegarVerificacaoCodigo}

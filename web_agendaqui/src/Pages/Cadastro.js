@@ -164,6 +164,7 @@ export default function Cadastro() {
               }
             }).then((response) => {
               console.log(response.data)
+              window.location.href = 'http://localhost:3000'
             }).catch((err) => {
               console.log(err.response.data)
             })

@@ -1,10 +1,10 @@
 import React from 'react';
-import Routes from './Routes';
+import Rotas from './Rotas';
 
 export default function Root() {
   return (
     <div>
-      <Routes />
+      <Rotas />
     </div>
   );
 }

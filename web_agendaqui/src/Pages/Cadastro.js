@@ -60,11 +60,11 @@ const ContainerCadastro = styled.div`
           }
         }
         .box-inputs {
-        display: flex;
-        flex-direction: column;
-        padding-bottom: 25px;
-        position: relative;
-        input {
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 25px;
+          position: relative;
+          input {
             font-size: 1.1em;
             width: 250px;
             padding: 10px 15px;
@@ -154,7 +154,7 @@ export default function Cadastro() {
                 nome: nome,
                 email: email,
                 telefone: telefone,
-                senha: senha,
+                password: senha,
                 codigo: codigo
             }
     

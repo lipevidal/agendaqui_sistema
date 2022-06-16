@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components'
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHouse, faStar, faCalendarDays, faBriefcase } from '@fortawesome/free-solid-svg-icons';
 
@@ -92,8 +92,9 @@ const ContainerHeader = styled.div`
 
     @media (max-width: 600px)  {
         position: fixed;
-        top: calc(100vh - 50px);
+        bottom: 0;
         left: 0;
+        z-index: 200;
         .conteudo-header {
             .box-icone {
                 .mobile {
@@ -112,8 +113,8 @@ const ContainerHeader = styled.div`
     }
 `
 
-export default function Header({ token,  onclickMostarPerfil }) {
-    const [tkn, setTkn] = useState(token);
+export default function Header() {
+    const token = !!localStorage.getItem('token-agendaqui')
 
     
   return (
@@ -121,30 +122,30 @@ export default function Header({ token,  onclickMostarPerfil }) {
         <div className='center'>
             <div className='conteudo-header'>
 
-                <Link to={token ? `/${token}` : '/'} className='box-icone'>
+                <Link to="/" className='box-icone'>
                     <p className='web'>Home</p>
                     <p className='mobile'>{home}</p>
                 </Link>
 
-                <Link to={token ? `/${token}` : '/'} className='box-icone'>
+                <Link to="/favorito" className='box-icone'>
                     <p className='mobile'>{favorito}</p>
                     <p className='web'>Favoritos</p>
                 </Link>
 
-                <Link to={token ? `/${token}` : '/'} className='box-icone'>
+                <Link to="/agendamento" className='box-icone'>
                     <p className='mobile'>{agendamento}</p>
                     <p className='web'>Agendamentos</p>
                 </Link>
 
-                <Link to={token ? `/${token}` : '/'} className='box-icone'>
+                <Link to="/" className='box-icone'>
                     <p className='mobile'>{negocio}</p>
                     <p className='web'>Negócios</p>
                 </Link>
 
                 {token ? 
-                    <button onClick={onclickMostarPerfil} className='perfil'></button> 
+                    <Link to="perfil" className='perfil'></Link> 
                     : 
-                    <Link to='/login' className='login'>Fazer<br />Login</Link>
+                    <Link to='/login' className='login'>Fazer Login</Link>
                 }
                 
                 {/* <div className='mobile'>

@@ -80,7 +80,7 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [erro, setErro] = useState('')
-    const [token, setToken] = useState('')
+    //const [token, setToken] = useState('')
 
     const Entrar = () => {
         const body = {
@@ -93,8 +93,10 @@ export default function Login() {
           }
         }).then((response) => {
           console.log(response.data.token)
-          setToken(response.data.token)
-          window.location.href = `http://localhost:3000/token=${response.data.token}`
+          //setToken(response.data.token)
+          const dados = response.data.token
+          localStorage.setItem('token-agendaqui', dados)
+          window.location.href = `http://localhost:3000`
         }).catch((err) => {
           console.log(err.response.data.erro)
           setErro(err.response.data.erro)

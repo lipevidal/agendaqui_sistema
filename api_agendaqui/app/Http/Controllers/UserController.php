@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Comtele\Services\TextMessageService;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -110,14 +111,55 @@ class UserController extends Controller
         if($user === null) {
             return response()->json(['erro' => 'O usuário não existe'], 400);
         }
-        $request->validate($user->rules(), $user->feedback());
-        $user->update([
-            'nome' => $request->nome,
-            'email' => $request->email,
-            'telefone' => $request->telefone,
-            'password' => bcrypt($request->password)
-        ]);
-        return response()->json(['sucesso' => 'Atualização realizada com sucesso'], 200);
+
+        if($request->method() === 'PATCH') {
+            
+            if($request->excluir) {
+                Storage::disk('public')->delete($user->foto_do_perfil);
+                $user->update($request->all());
+                return response()->json(['sucesso' => 'Foto deletada com sucesso'], 200);
+            } else {
+                $regrasDinamicas = array();
+
+                foreach($user->rules() as $input => $regra) {
+                    if(array_key_exists($input, $request->all())) {
+                        $regrasDinamicas[$input] = $regra;
+                    }
+                } 
+
+                $request->validate($regrasDinamicas, $user->feedback());
+
+                if($request->file('foto_do_perfil')) {
+                    Storage::disk('public')->delete($user->foto_do_perfil);
+    
+                    $imagem = $request->file('foto_do_perfil');
+                    $imagem_urn = $imagem->store('imagens/perfil', 'public');
+                    $user->update([
+                        'nome' => $request->nome,
+                        'email' => $request->email,
+                        'telefone' => $request->telefone,
+                        'foto_do_perfil' => $imagem_urn
+                    ]);
+                    return response()->json(['sucesso' => 'Atualização realizada com sucesso'], 200);
+                } else {
+                    $user->update($request->all());
+                    return response()->json(['sucesso' => 'Atualização realizada com sucesso'], 200);
+                }
+            }
+
+        } else {
+            $request->validate($user->rules(), $user->feedback());
+
+            $user->update([
+                'nome' => $request->nome,
+                'email' => $request->email,
+                'telefone' => $request->telefone,
+                'password' => bcrypt($request->password)
+            ]);
+    
+            return response()->json(['sucesso' => 'Atualização realizada com sucesso'], 200);
+        }
+
     }
 
     /**

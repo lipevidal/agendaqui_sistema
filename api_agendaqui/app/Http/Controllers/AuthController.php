@@ -20,7 +20,8 @@ class AuthController extends Controller
 
     public function logout() 
     {
-        return '';
+        auth('api')->logout();
+        return response()->json(['sucesso' => 'Logout realizado com sucesso'], 403);
     }
 
     public function refresh() 
@@ -30,6 +31,6 @@ class AuthController extends Controller
 
     public function me() 
     {
-        return '';
+        return response()->json(auth()->user());
     }
 }

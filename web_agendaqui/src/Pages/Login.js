@@ -3,84 +3,66 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Logo_agendaqui_laranja from '../imagens/logo_agendaqui/logo-agendaqui-laranja.png'
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux'
+import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
+import Loading from '../Components/Loading';
 
 const ContainerLogin = styled.div`
-    background-color: #141f36;
+    background-color: var(--cor-bg-escura);
+    color: var(--cor-texto-branca);
     height: 100vh;
-    color: #ececf6;
-    margin: 0;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    .imagem-logo {
-        width:280px;
-        img {
-            width: 100%;
-        }
+`
+
+const Img = styled.div`
+    margin-right: 50px;
+    img {
+      width: 350px;
     }
-    .box-inputs {
-        display: flex;
-        flex-direction: column;
-        padding-bottom: 15px;
-        input {
-            margin: 10px 0;
-            font-size: 1.1em;
-            width: 250px;
-            padding: 10px 15px;
-            letter-spacing: 2px;
-            background-color: #2d3d547e;
-            border-radius: 10px;
-            outline: none;
-            color: #ececf6;
-            border: none;
-        }
-        p {
-            margin-top: 1px;
-            margin-left: 5px;
-            font-size: 0.8em;
-            text-align: left;
-            color: red;
-            height: 15px;
-        }
-    }
-    button {
-        background-color: #369a5d;
-        padding: 10px 20px;
-        border-radius: 10px;
-        border: none; 
-        color: #ececf6;
-        cursor: pointer;
-        &:hover {
-            background-color: #4eca7a;
-        }
-    }
-    .link-cadastro {
-        color: #ececf6;
-        margin: 30px;
-        text-decoration: none;
-        border: 1px solid #ececf6;
-        border-radius: 10px;
-        padding: 10px;
-        &:hover {
-            color: #FF5D00;
-            border: 1px solid #FF5D00;
-        }
-    }
-    .link-recuperer-senha {
-        color: #ececf6;
-        &:hover {
-            color: white;
-            text-decoration: none;
-        }
+
+    @media screen and (max-width: 800px) {
+        display: none;
     }
 `
 
-export default function Login() {
+const Form = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .imagem-logo {
+      width:280px;
+      img {
+          width: 100%;
+      }
+  }
+  button {
+      margin-top: 30px;
+  }
+  .title {
+    width: 250px;
+    text-align: center;
+    margin: 30px 0 5px;
+    p {
+      font-size: 0.9em;
+      a {
+        color: #F2272C;
+      }
+    }
+  }
+  .link {
+    font-size: 0.9em;
+  }
+`
+
+export default function Login(props) {
+    const dispatch = useDispatch()
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
-    const [erro, setErro] = useState('')
-    //const [token, setToken] = useState('')
+    const [erro, setErro] = useState('');
+    const [loading, setLoading] = useState(false)
 
     const Entrar = () => {
         const body = {
@@ -92,13 +74,13 @@ export default function Login() {
             Accept : 'application/json'
           }
         }).then((response) => {
-          console.log(response.data.token)
-          //setToken(response.data.token)
+          console.log('Fiz uma requisição de login na Api e deu certo')
           const dados = response.data.token
           localStorage.setItem('token-agendaqui', dados)
-          window.location.href = `http://localhost:3000`
+          dispatch(getUser(dados))
+          props.history.push('/')
         }).catch((err) => {
-          console.log(err.response.data.erro)
+          console.log('Fiz uma requisição de login e deu errado')
           setErro(err.response.data.erro)
         })
       
@@ -116,17 +98,35 @@ export default function Login() {
 
   return (
     <ContainerLogin>
-        <div className='box-inputs'>
-            <div className='imagem-logo'>
+        {loading ? <Loading /> : ''}
+        <Img className='slide-in-left'>
+          <img src='img/imagemAnimadaLogin.gif'/>
+        </Img>
+
+        <Form>
+            <div className='imagem-logo slide-in-top'>
                 <img src={Logo_agendaqui_laranja} />
             </div>
-            <input value={email.trim()} onChange={pegarEmail} placeholder='Email' autoComplete='none'/>
-            <input type="password" value={senha} onChange={pegarSenha} placeholder='Senha' autoComplete='none'/>
-            <p>{erro}</p>
-        </div>
-        <button onClick={Entrar}>Entrar</button>
-        <Link to="/cadastro" className='link-cadastro'>Cadastrar</Link>
-        <Link to="/recuperar-senha" className='link-recuperer-senha'>Recuperar senha</Link>
+            <div className='flex-column-center slide-in-bottom'>
+                <div className="label-float">
+                    <input value={email.trim()} onChange={pegarEmail} placeholder=" " autoComplete='none' required/>
+                    <label>Email</label>
+                </div>
+                <br/>
+                <div className="label-float">
+                    <input type="password" placeholder=" " value={senha} onChange={pegarSenha} autoComplete='none' required/>
+                    <label>Senha</label>
+                </div>
+                <p className='erro-texto'>{erro}</p>
+                
+                <button className='botao-sucesso' onClick={Entrar}>Entrar</button>
+                <div className='title'>
+                  <p>Não tem uma conta? <Link to="/cadastro">Increver-se</Link></p>
+                </div>
+                
+                <Link to="/recuperar-senha" className='link'>Recuperar senha</Link>
+            </div>
+        </Form>
     </ContainerLogin>
   );
 }

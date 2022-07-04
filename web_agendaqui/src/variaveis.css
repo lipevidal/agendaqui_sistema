@@ -1,0 +1,13 @@
+:root {
+    --cor-bg-escura: #141f36;
+    --cor-bg-clara: #2d3d547e;
+    --cor-texto-branca: #ececf6;
+    --cor-erro: #df484a;
+    --cor-logo: #ff5d00;
+    --cor-padrao: #1b5cdc;
+    --cor-padrao-hover: #2d6cea;
+    --cor-sucesso: #4eca7a;
+    --cor-sucesso-hover: #4eca7a;
+    --cor-placeholder: #666;
+    --altura-header: 60px;
+}

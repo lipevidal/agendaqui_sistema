@@ -1,198 +1,236 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { Link, useParams } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHouse, faStar, faCalendarDays, faBriefcase } from '@fortawesome/free-solid-svg-icons';
-
-const home = <FontAwesomeIcon icon={faHouse} className='icone'/>
-const favorito = <FontAwesomeIcon icon={faStar} className='icone'/>
-const agendamento = <FontAwesomeIcon icon={faCalendarDays} className='icone'/>
-const negocio = <FontAwesomeIcon icon={faBriefcase} className='icone'/>
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import Negocios from './Negocios';
+import Logo_agendaqui_laranja from '../imagens/logo_agendaqui/logo-agendaqui-laranja.png'
+import IconeSino from '../imagens/icones/bell.png'
+import IconeCalendario from '../imagens/icones/calendario.png'
+import IconeEstrela from '../imagens/icones/estrela.png'
+import IconeHome from '../imagens/icones/home.png'
+import IconeMaleta from '../imagens/icones/maleta.png'
+import IconeLogin from '../imagens/icones/login.png'
 
 const ContainerHeader = styled.div`
-    height: 50px;
-    background-color: #141f36;
     color: #ececf6;
-    width:100%;
-    .conteudo-header {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-
-
-        /* .mobile, .web {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            .box-icone {
-                color: white;
-                line-height: 50px;
-                margin: 0 15px;
-            }
-            .perfil {
-                height: 1.1em;
-                width: 1.1em;
-                border-radius: 50%;
-                background-color: red;
-                background-image: url('img/perfilneutra.jpg');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: cover;
-                border: none;
-                cursor: pointer;
-            }
-            .login {
-                font-size: 0.9em;
-                text-decoration: none;
-                text-align: center;
-                color: orange;
-            }
-        } */
-        .box-icone {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            .mobile {
-                display: none;
-                font-size: 1.2em;
-            }
-            .web {
-                .perfil {
-                    font-size: 1.8em;
-                }
-            }
-        }
-
-        .perfil {
-            height: 1.4em;
-            width: 1.4em;
-            border-radius: 50%;
-            background-image: url('img/perfilneutra.jpg');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-            border: none;
-            cursor: pointer;
-        }
-
-        .login {
-            font-size: 0.9em;
-            text-decoration: none;
-            text-align: center;
-            color: orange;
-        }
-        
-    }
-
-    /* .box-perfil {
-        width: 100%;
-        min-height: calc(100vh - 50px);
-        background-color: white;
-    } */
-
-    @media (max-width: 600px)  {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        z-index: 200;
-        .conteudo-header {
-            .box-icone {
-                .mobile {
-                    display: flex;
-                }
-                .web {
-                    display: none;
-                }
-            }
-        }
-        .box-perfil {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
+    background-color: #141f36;
+    display: flex;
+    position: fixed;
+    top: 0;
+    height: var(--altura-header);
+    width: 100%;
+    z-index: 2000;
+    button {
+        border: none;
+        outline: none;
+        background-color: transparent;
+        cursor: pointer;
     }
 `
 
+const Cabecalho = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+`
+
+const Logo = styled.div`
+    width: 150px;
+    cursor: pointer;
+    img {
+        width: 100%;
+    }
+`
+
+const Links = styled.nav`
+display: flex;
+color: white;
+margin: 0 15px;
+text-decoration: none;
+.box-icone {
+    text-decoration: none;
+}
+.web {
+    color: white;
+    margin: 0 10px;
+    &:hover {
+        color: #F2272C;
+    }
+}
+.mobile {
+    display: none;
+    width: 25px;
+}
+
+@media (max-width: 650px) {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 200;
+    max-width: 650px;
+    width: 100%;
+    margin-left: -1px;
+    background-color: var(--cor-bg-escura);
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    .mobile {
+        display: flex;
+    }
+    .web {
+        display: none;
+    }
+}
+
+`
+
+const Perfil = styled.div`
+display: flex;
+.perfil {
+    height: 2.5em;
+    width: 2.5em;
+    border-radius: 50%;
+    /* background-image: url('img/perfilneutra.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; */
+    border: none;
+    cursor: pointer;
+    margin: 15px;
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+}
+.login {
+    font-size: 0.9em;
+    text-decoration: none;
+    text-align: center;
+    color: #F2272C;
+    display: flex;
+    align-items: center;
+    img {
+        width: 15px;
+        margin: 0 5px;
+    }
+} 
+.icone {
+    width: 30px;
+    margin: 15px;
+    cursor: pointer;
+    img {
+        width: 80%;
+        &:hover {
+            width: 100%;
+        }
+    }
+}
+`
+
+const BoxNegocio = styled.div`
+    position: absolute;
+    top: var(--altura-header);
+    right: 0;
+    max-width: 400px;
+    width: 100%;
+    height: calc(100vh - var(--altura-header));
+    padding: 20px;
+    background-color: #ccc;
+    box-shadow: -4px 0 15px 0px #000;
+`
+
 export default function Header() {
-    const token = !!localStorage.getItem('token-agendaqui')
+    const token = localStorage.getItem('token-agendaqui')
+    const [urlBase, setUrlBase] = useState('http://localhost:8000')
+    const [paginaNegocio, setPaginaNegocio] = useState(false)
+
+    const user = useSelector((state) => {
+        return state.user
+    })
+
+  const abrirFecharAbaNegocio = () => {
+    if(paginaNegocio) {
+        setPaginaNegocio(false)
+    } else {
+        setPaginaNegocio(true)
+    }
+  }
 
     
   return (
     <ContainerHeader>
-        <div className='center'>
-            <div className='conteudo-header'>
+            <div className='center'>
+                <Cabecalho>
+                    <Logo>
+                        <Link to="/">
+                            <img src={Logo_agendaqui_laranja} />
+                        </Link>
+                    </Logo>
 
-                <Link to="/" className='box-icone'>
-                    <p className='web'>Home</p>
-                    <p className='mobile'>{home}</p>
-                </Link>
+                    <Links>
+                        <Link to="/" className='box-icone'>
+                            <img src={IconeHome} className='mobile' />
+                            <p className='web'>Home</p>
+                        </Link>
 
-                <Link to="/favorito" className='box-icone'>
-                    <p className='mobile'>{favorito}</p>
-                    <p className='web'>Favoritos</p>
-                </Link>
+                        <Link to="/favorito" className='box-icone'>
+                            <img src={IconeEstrela} className='mobile' />
+                            <p className='web'>Favoritos</p>
+                        </Link>
 
-                <Link to="/agendamento" className='box-icone'>
-                    <p className='mobile'>{agendamento}</p>
-                    <p className='web'>Agendamentos</p>
-                </Link>
+                        <Link to="/agendamento" className='box-icone'>
+                            <img src={IconeCalendario} className='mobile' />
+                            <p className='web'>Agendamentos</p>
+                        </Link>
 
-                <Link to="/" className='box-icone'>
-                    <p className='mobile'>{negocio}</p>
-                    <p className='web'>Negócios</p>
-                </Link>
+                        <button onClick={abrirFecharAbaNegocio} className='box-icone'>
+                            <img src={IconeMaleta} className='mobile' />
+                            <p className='web'>Negócios</p>
+                        </button>
+                    </Links>
 
-                {token ? 
-                    <Link to="perfil" className='perfil'></Link> 
-                    : 
-                    <Link to='/login' className='login'>Fazer Login</Link>
-                }
-                
-                {/* <div className='mobile'>
-                    <Link to='/' className='box-icone'>
-                        {home}
-                    </Link>
+                    <Perfil>
+                        {token ?
+                        <button className='icone shake-top'>
+                            <img src={IconeSino}/>
+                        </button> : ''
+                        }
+                        {token ? 
+                            <Link to="/perfil" className='perfil'>
+                                {user.foto_do_perfil ? 
+                                <img src={`${urlBase}/storage/${user.foto_do_perfil}`}/>
+                                : <img src="img/perfilneutra.jpg"/>
+                                }
+                            </Link> 
+                            : 
+                            <Link to='/login' className='login'>Entrar<img src={IconeLogin}/></Link>
+                        }
+                    </Perfil>
 
-                    <Link to='/' className='box-icone'>
-                        {favorito}
-                    </Link>
-
-                    <Link to='/' className='box-icone'>
-                        {agendamento}
-                    </Link>
-
-                    <Link to='/' className='box-icone'>
-                        {negocio}
-                    </Link>
-
-                    {token ? <button onClick={props.onclickMostarPerfil} className='box-icone perfil'></button> : <Link to='/login' className='login'>Fazer<br />Login</Link>}
-                    
-                </div>
-
-                <div className='web'>
-                    <Link to='/' className='box-icone'>
-                        Home
-                    </Link>
-
-                    <Link to='/' className='box-icone'>
-                        Favoritos
-                    </Link>
-
-                    <Link to='/' className='box-icone'>
-                        Agendamentos
-                    </Link>
-
-                    <Link to='/' className='box-icone'>
-                        Negócios
-                    </Link>
-
-                    {token ? <button onClick={props.onclickMostarPerfil} className='box-icone perfil'></button> : <Link to='/login' className='login'>Fazer Login</Link>}
-                </div> */}
-
-
-
+                </Cabecalho>
             </div>
-        </div>
+        {
+            paginaNegocio ?
+                <BoxNegocio className='scale-up-tr'>
+                    {token ? 
+                        <Negocios 
+                            onclickfecharAbaNegocios={abrirFecharAbaNegocio}
+                        />
+                    : 
+                    <div className='box-erro'>
+                        <h3>Faça o login para acessar os negócios</h3>
+                        <Link className='botao' to="/login">Login</Link>
+                    </div>
+                    }
+                </BoxNegocio>
+            : ''
+        }
     </ContainerHeader>
   );
 }

@@ -6,18 +6,27 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons'
 
-const element = <FontAwesomeIcon icon={faArrowLeftLong} className='i-seta'/>
+const iconeSetaVoltar = <FontAwesomeIcon icon={faArrowLeftLong} className='i-seta'/>
 
 
 const ContainerCadastro = styled.div`
-    background-color: #141f36;
+    background-color: var(--cor-bg-escura);
     height: 100vh;
-    color: #ececf6;
-    margin: 0;
+    color: var(--cor-texto-branca);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    .icone {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      text-align: left;
+      .i-seta {
+        color: var(--cor-texto-branca);
+        font-size: 2em;
+      }
+    }
     .boxCodigo {
         display: flex;
         flex-direction: column;
@@ -25,76 +34,31 @@ const ContainerCadastro = styled.div`
         p {
             text-align: center;
         }
-        p.codigo-incorreto {
-          margin-top: 2px;
-          margin-left: 5px;
-          margin-bottom: 18px;
-          font-size: 0.8em;
-          text-align: left;
-          color: red;
-          height: 15px;
-        }
         input {
             width: 100px;
+            margin-top: 20px;
             font-size: 1.1em;
             text-align: center;
             padding: 10px 15px;
             letter-spacing: 2px;
-            background-color: #2d3d547e;
+            background-color: var(--cor-bg-clara);
             border-radius: 10px;
             outline: none;
-            color: #ececf6;
+            color: var(--cor-texto-branca);
             border: none;
         }
     }
     .form {
         text-align: center;
-        .icone {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          text-align: left;
-          .i-seta {
-            color: #ececf6;
-            font-size: 2em;
-          }
-        }
-        .box-inputs {
-          display: flex;
-          flex-direction: column;
-          padding-bottom: 25px;
-          position: relative;
-          input {
-            font-size: 1.1em;
-            width: 250px;
-            padding: 10px 15px;
-            letter-spacing: 2px;
-            background-color: #2d3d547e;
-            border-radius: 10px;
-            outline: none;
-            color: #ececf6;
-            border: none;
-          }
-        }
-        p{
-          margin-top: 1px;
-          margin-left: 5px;
-          font-size: 0.8em;
-          text-align: left;
-          color: red;
-          height: 15px;
-        }
     }
-    button {
-        background-color: #369a5d;
-        padding: 10px 20px;
-        border-radius: 10px;
-        border: none; 
-        color: #ececf6;
-        cursor: pointer;
-        &:hover {
-            background-color: #4eca7a;
-        }
+    .erro-texto {
+      margin-bottom: 15px;
+      margin-left: 8px;
+    }
+    .label-float {
+      input {
+        width: 280px;
+      }
     }
 `
 
@@ -130,13 +94,13 @@ export default function Cadastro() {
             Accept : 'application/json'
           }
         }).then((response) => {
+          console.log('Fiz uma requisição de envio de código e deu certo')
           console.log(response.data)
           setCodigo(response.data)
-          //let tel = telefone.replace(/[^0-9]/g,'')
           setPaginaCodigo(true)
           
         }).catch((err) => {
-          console.log(err.response.data.errors)
+          console.log('Fiz uma requisição de envio de código e deu errado')
           setErroEmail(err.response.data.errors.email)
           setErroNome(err.response.data.errors.nome)
           setErroTelefone(err.response.data.errors.telefone)
@@ -162,11 +126,11 @@ export default function Cadastro() {
               headers: {
                 Accept: 'application/json'
               }
-            }).then((response) => {
-              console.log(response.data)
+            }).then(() => {
+              console.log('Fiz uma requisição de cadastro e deu certo')
               window.location.href = 'http://localhost:3000'
             }).catch((err) => {
-              console.log(err.response.data)
+              console.log('Fiz uma requisição de cadastro e deu errado')
             })
         }
     }
@@ -203,34 +167,56 @@ export default function Cadastro() {
 
   return (
     <ContainerCadastro>
+      <div className='center'>
+        <Link to='/login' className='icone'>
+          {iconeSetaVoltar}
+        </Link>
         {paginaCodigo ? 
-            <div className="boxCodigo">
-                <p>Digite o código enviado para o número: <br />{telefone}</p>
-                <InputMask mask="999999" value={verificaCodigo} onChange={pegarVerificacaoCodigo} autoComplete="none"/>
-                <p className="codigo-incorreto">{mensagemErro}</p>
-                <button onClick={cadastrarUsuario}>Enviar</button>
-            </div> 
-            : 
-            <div className='form'>
-                <Link to='/login' className='icone'>
-                  {element}
-                </Link>
-                <h1>CADASTRE-SE</h1>
-                <div className='box-inputs'>
-                    <input value={nome} onChange={pegarNome} placeholder='Nome' autoComplete='none'/>
-                    <p>{erroNome}</p>
-                    <InputMask mask="(99)99999-9999" value={telefone} onChange={pegarTelefone} placeholder='Telefone' autoComplete='none'/>
-                    <p>{erroTelefone}</p>
-                    <input value={email.trim()} onChange={pegarEmail} placeholder='Email' autoComplete='none'/>
-                    <p>{erroEmail}</p>
-                    <input type="password" value={senha} onChange={pegarSenha} placeholder='Senha' autoComplete='none'/>
-                    <p>{erroSenha}</p>
-                    <input type="password" value={repitaSenha} onChange={pegarRepitaSenha} placeholder='Repita sua senha' autoComplete='none'/>
-                    <p>{mensagemErro}</p>
-                </div>
-                <button onClick={EnviarCodigo}>Enviar</button>
+          <div className="boxCodigo slide-in-fwd-center">
+            <p>Digite o código enviado para o número: <br />{telefone}</p>
+            <InputMask mask="999999" value={verificaCodigo} onChange={pegarVerificacaoCodigo} autoComplete="none"/>
+            <p className='erro-texto'>{mensagemErro}</p>
+            <button className='botao-sucesso' onClick={cadastrarUsuario}>Enviar</button>
+          </div> 
+          : 
+          <div className='form slide-in-fwd-center'>
+            <h1>CADASTRE-SE</h1>
+            <div className='box-inputs'>
+              <div className="label-float">
+                <input className='primeira-maiuscula' value={nome} onChange={pegarNome} placeholder=" " autoComplete='none' required/>
+                <label>Nome</label>
+              </div>
+              <p className='erro-texto'>{erroNome}</p>
+
+              <div className="label-float">
+                <InputMask mask="(99)99999-9999" value={telefone} onChange={pegarTelefone} placeholder=" " autoComplete='none' required/>
+                <label>Telefone</label>
+              </div>
+              <p className='erro-texto'>{erroTelefone}</p>
+
+              <div className="label-float">
+                <input className='minusculo' value={email.trim()} onChange={pegarEmail} placeholder=" " autoComplete='none' required/>
+                <label>Email</label>
+              </div>
+              <p className='erro-texto'>{erroEmail}</p>
+
+              <div className="label-float">
+                <input type="password" value={senha} onChange={pegarSenha} placeholder=" " autoComplete='none' required/>
+                <label>Senha</label>
+              </div>
+              <p className='erro-texto'>{erroSenha}</p>
+
+              <div className="label-float">
+                <input type="password" value={repitaSenha} onChange={pegarRepitaSenha} placeholder=" " autoComplete='none' required/>
+                <label>Repita a senha</label>
+              </div>
+              <p className='erro-texto'>{mensagemErro}</p>
+              
             </div>
+            <button className='botao-sucesso' onClick={EnviarCodigo}>Enviar</button>
+          </div>
         }
+      </div>
     </ContainerCadastro>
   );
 }

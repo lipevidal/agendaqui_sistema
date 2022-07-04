@@ -9,17 +9,15 @@ const BoxCodigo = styled.div`
     p {
         text-align: center;
     }
+    p.chamada {
+      margin-bottom: 15px;
+    }
     p::first-letter {
       text-transform: capitalize;
     }
-    p.codigo-incorreto {
+    .erro-texto {
       margin-top: 2px;
-      margin-left: 5px;
-      margin-bottom: 18px;
-      font-size: 0.8em;
-      text-align: left;
-      color: red;
-      height: 15px;
+      margin-left: 0;
     }
     input {
         width: 100px;
@@ -38,9 +36,9 @@ const BoxCodigo = styled.div`
 export default function Codigos(props) {
   return (
     <BoxCodigo>
-        <p>Olá {props.nomeUsuario}, <br /><br /> Digite o código enviado para: <br />{props.numeroTelefoneEmail}</p>
+        <p className='chamada'>Olá {props.nomeUsuario}, <br /><br /> Digite o código enviado para: <br />{props.numeroTelefoneEmail}</p>
         <InputMask mask="999999" value={props.valorCodigo} onChange={props.verificacaoCodigo} autoComplete="none"/>
-        <p className="codigo-incorreto">{props.mensagemErro}</p>
+        <p className="erro-texto">{props.mensagemErro}</p>
         <button onClick={props.atualizarSenha}>Enviar</button>
     </BoxCodigo> 
   );

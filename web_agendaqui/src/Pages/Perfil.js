@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import styled from 'styled-components';
 import App from '../layouts/App';
 import { Link } from 'react-router-dom';
@@ -9,6 +9,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil, faArrowLeftLong } from '@fortawesome/free-solid-svg-icons'
 import Codigos from '../Components/Codigos';
 import NovaSenha from '../Components/NovaSenha';
+import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
+import { useDispatch, useSelector } from 'react-redux'
+import store from '../store/store'
+import PopUp from '../Components/PopUp';
 
 const iconeLapis = <FontAwesomeIcon icon={faPencil} className='icone-lapis'/>
 const iconeSeta = <FontAwesomeIcon icon={faArrowLeftLong} className='icone-seta'/>
@@ -32,9 +36,8 @@ const ContainerPerfil = styled.div`
         flex-direction: column;
         justify-content: start;
         align-items: center;
-        padding-bottom: 60px;
         .box-imagem {
-            margin: 20px;
+            margin: 15px;
             width: 120px;
             height: 120px;
             background-color: #eee;
@@ -67,28 +70,16 @@ const ContainerPerfil = styled.div`
           justify-content: start;
           padding-bottom: 25px;
           position: relative;
+          p.tel {
+            margin: 0 15px;
+            font-size: 1.3em;
+          }
           .box-input-nome {
-            position: relative;
-            margin-top: 15px;
-            input#nomeDesabilitado, input#nomeHabilitado {
-                font-size: 2em;
-                text-align: center;
-                border: none;
-                color: white;
-                outline: none;
-                max-width: 250px;
-                width: 100%;
-            }
-            input#nomeHabilitado {
-                color: black;
-            }
             button {
-                position: absolute;
-                top: 8px;
-                right: 5px;
                 background-color: transparent;
                 border: none;
                 outline: none;
+                color: white;
                 cursor: pointer;
             }
           }
@@ -96,10 +87,6 @@ const ContainerPerfil = styled.div`
             display: flex;
             align-items: center;
             margin: 10px;
-            p.tel {
-                margin: 0 15px;
-                font-size: 1.3em;
-            }
             button {
                 background-color: transparent;
                 border-radius: 50%;
@@ -132,17 +119,6 @@ const ContainerPerfil = styled.div`
                 cursor: pointer;
             }
           }
-          /* input {
-            font-size: 1.1em;
-            width: 250px;
-            padding: 10px 15px;
-            letter-spacing: 2px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            outline: none;
-            color: #000;
-            border: none;
-          } */
           button.rec {
             color: #ececf6;
             margin:10px;
@@ -218,14 +194,13 @@ const ContainerPerfil = styled.div`
 `
 
 export default function Perfil() {
-    const [user, setUser] = useState('')
-    const [id, setId] = useState('')
     const [imagem, setImagem] = useState('')
     const [imagemBE, setImagemBE] = useState('')
-    const [imagemPadrao, setImagemPadrao] = useState(ImagemPadrao)
-    const [nome, setNome] = useState(''.trim())
-    const [telefone, setTelefone] = useState('')
+    const [nome, setNome] = useState('')
     const [email, setEmail] = useState('')
+    const [id, setId] = useState('')
+    const [imagemPadrao, setImagemPadrao] = useState(ImagemPadrao)
+    const [telefone, setTelefone] = useState('')
     const [senha, setSenha] = useState('')
     const [senhaRepetida, setSenhaRepetida] = useState('')
     const [repitaSenha, setRepitaSenha] = useState('')
@@ -243,38 +218,15 @@ export default function Perfil() {
     const [mudarNome, setMudarNome] = useState(false)
     const [telaDefinirNovaSenha, setTelaDefinirNovaSenha] = useState(false)
     const [telaAlterarTelefone, setTelaAlterarTelefone] = useState(false)
-    const [token, setToken] = useState('')
+    const [popUpNome, setPopUpNome] = useState(false)
+    const [popUpEmail, setPopUpEmail] = useState(false)
 
-    useEffect(() => {
-          const tkn = localStorage.getItem('token-agendaqui')
-          setToken(tkn)
-          console.log(token)
-          const body = {}
-          axios.post('http://localhost:8000/api/v1/me', body, {
-            headers: {
-              'Accept' : 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${tkn}`
-            }
-          }).then((response) => {
-            console.log(response)
-            setUser(response.data)
-            setNome(response.data.nome)
-            setEmail(response.data.email)
-            setTelefone(response.data.telefone)
-            if(response.data.foto_do_perfil) {
-                setImagem(`http://localhost:8000/storage/${response.data.foto_do_perfil}`)
-                setImagemBE(`http://localhost:8000/storage/${response.data.foto_do_perfil}`)
-            } else {
-                setImagem('')
-                setImagemBE('')
-            }
-            setId(response.data.id)
-          }).catch((err) => {
-            console.log(err)
-          })
-          console.log(imagem)
-    }, [telaAlterarTelefone])
+
+    const dispatch = useDispatch()
+
+    const user = useSelector((state) => {
+        return state.user
+    })
 
     const gerarCodigo = () => {
          
@@ -286,7 +238,7 @@ export default function Perfil() {
             codigo: codigo,
         }
     
-        axios.post('http://localhost:8000/api/user', body, {
+        api.post('/api/user', body, {
             headers: {
             'Accept': 'application/json'
             }
@@ -311,18 +263,8 @@ export default function Perfil() {
             telefone: novoTelefone,
             imagem_do_perfil: imagem
           }
-          axios.patch(`http://localhost:8000/api/user/${id}`, body, {
-            headers: {
-              Accept : 'application/json'
-            }
-          }).then((response) => {
-            console.log(response.data)
-            setTelaAlterarTelefone(false)
-            //let tel = telefone.replace(/[^0-9]/g,'')
-          }).catch((err) => {
-            console.log(err.response)
-            setErro(err.response.data.errors.password)
-          })
+          dispatch(updateTelefone(id, body))
+          setTelaAlterarTelefone(false)
         }
     }
 
@@ -336,51 +278,26 @@ export default function Perfil() {
         if(imagem && imagem !== imagemBE) {
             formData.append('foto_do_perfil', imagem)
         }
-        
-        axios.post(`http://localhost:8000/api/user/${id}`, formData, {
-        headers: {
-            'Accept' : 'application/json',
-            'Content-Type': 'multipart/form-data'
-        }
-        }).then((response) => {
-            console.log(response.data)
-            document.location.reload(true);
-        }).catch((err) => {
-            console.log(err.response)
-            setErroNome(err.response.data.errors.nome)
-            setErroEmail(err.response.data.errors.email)
-        })
+        dispatch(getUser(updateUser(id, formData)))
     }
 
     const excluirPhoto = () => {
         if(imagem === imagemBE) {
-            //Excluir do banco de dados
             setErro('')
             let formData = new FormData();
             formData.append('_method', 'patch')
             formData.append('foto_do_perfil', '')
             formData.append('excluir', true)
-            
-            axios.post(`http://localhost:8000/api/user/${id}`, formData, {
-            headers: {
-                'Accept' : 'application/json',
-                'Content-Type': 'multipart/form-data'
-            }
-            }).then((response) => {
-                console.log(response.data)
-                document.location.reload(true);
-            }).catch((err) => {
-                console.log(err.response)
-            })
-            } else {
-                document.location.reload(true);
-            }
+            dispatch(deleteFoto(id, formData))
+        } else {
+            document.location.reload(true);
+        }
     }
 
     const logout = () => {
-        localStorage.removeItem('token-agendaqui')
+        const token = localStorage.getItem('token-agendaqui')
         const body = {}
-          axios.post('http://localhost:8000/api/v1/logout', body, {
+          api.post('http://localhost:8000/api/v1/logout', body, {
             headers: {
               'Accept' : 'application/json',
               'Content-Type': 'application/json',
@@ -388,9 +305,9 @@ export default function Perfil() {
             }
           }).then((response) => {
             console.log(response)
+            localStorage.removeItem('token-agendaqui')
             window.location.href = 'http://localhost:3000/login'
           }).catch((err) => {
-            window.location.href = 'http://localhost:3000/login'
             console.log(err)
           })
     }
@@ -406,17 +323,7 @@ export default function Perfil() {
             telefone: telefone,
             password: senha,
           }
-          axios.put(`http://localhost:8000/api/user/${id}`, body, {
-            headers: {
-              Accept : 'application/json'
-            }
-          }).then((response) => {
-            console.log(response.data)
-            window.location.href = 'http://localhost:3000/perfil'
-          }).catch((err) => {
-            console.log(err.response.data.errors)
-            setErro(err.response.data.errors.password)
-          })
+          dispatch(newPassword(id, body))
         }
       
     }
@@ -475,7 +382,24 @@ export default function Perfil() {
     const pegarNovoTelefone = (event) => {
         setErro('')
         setNovoTelefone(event.target.value)
-    } 
+    }
+
+    const abrirFecharPopUpNome = () => {
+        if(popUpNome) {
+            setPopUpNome(false)
+        } else {
+            setPopUpNome(true)
+        }
+    }
+
+    const abrirFecharPopUpEmail = () => {
+        if(popUpEmail) {
+            setPopUpEmail(false)
+        } else {
+            setPopUpEmail(true)
+        }
+    }
+
 
   return (
     <ContainerPerfil>
@@ -522,31 +446,37 @@ export default function Perfil() {
                 ''
                 : 
                 <div className='box-perfil'>
+                    {popUpNome ? <PopUp onclickFecharPopUp={abrirFecharPopUpNome} value={nome} onchange={pegarNome} erro={erroNome} label="Nome"/> : ''}
+                    {popUpEmail ? <PopUp onclickFecharPopUp={abrirFecharPopUpEmail} value={email} onchange={pegarEmail} erro={erroEmail} label="Email"/> : ''}
                     <div className='box-imagem'>
-                        { imagem ? imagemBE === imagem ? 
-                            <img src={imagem} alt="ImagemAb" onClick={clicarImg}/> 
-                            : 
-                            <img src={URL.createObjectURL(imagem)} alt="Imagem" onClick={clicarImg}/> 
+                        {imagem ? <img src={URL.createObjectURL(imagem)} alt="Imagem" onClick={clicarImg}/> :
+                        user.foto_do_perfil ? <img src={`http://localhost:8000/storage/${user.foto_do_perfil}`} alt="ImagemAb" onClick={clicarImg}/> :
+                        <img src={imagemPadrao} alt="Selecione uma imagem" onClick={clicarImg} />
+                        }
+                        {/* { user.foto_do_perfil ? user.foto_do_perfil === imagem ? 
+                            <img src={URL.createObjectURL(imagem)} alt="Imagem" onClick={clicarImg}/>
+                            :
+                            <img src={`http://localhost:8000/storage/${user.foto_do_perfil}`} alt="ImagemAb" onClick={clicarImg}/>  
                             : 
                             <img src={imagemPadrao} alt="Selecione uma imagem" onClick={clicarImg} />
-                        }
+                        } */}
                     </div>
                     <input type="file" id='inputImg' accept=".png, .jpg, .jpeg" onChange={e => setImagem(e.target.files[0])}/>
                     { imagem ? <button onClick={excluirPhoto} className='del'>Excluir</button> : '' }
                     <div className='box-inputs'>
                         <div className='box-input-nome'>
-                            {mudarNome ? <input id='nomeHabilitado' value={nome} onChange={pegarNome} placeholder='Nome' autoComplete='none' onBlur={editarNome} /> : <input id='nomeDesabilitado' value={nome} onChange={pegarNome} placeholder='Nome' autoComplete='none' disabled />}
-                            <button onClick={editarNome}>{iconeLapis}</button>
+                            <h1><button onClick={abrirFecharPopUpNome}>{user.nome}</button></h1>
                         </div>
                         <p className='erro-nome'>{erroNome}</p>
                         <div className='box-telefone'>
                             <p>Telefone:</p>
-                            <p className='tel'>{telefone}</p>
+                            <p className='tel'>{user.telefone}</p>
                             <button onClick={irTelaTelefone}>{iconeLapis}</button>
                         </div> 
                         <div className='box-input-email'>
                             <p>Email:</p>
-                            <input value={email.trim()} onChange={pegarEmail} placeholder='Email' autoComplete='none'/>
+                            <p className='tel'>{user.email}</p>
+                            <button onClick={abrirFecharPopUpEmail}>{iconeLapis}</button>
                         </div>
                         <p className='erro'>{erroEmail}</p>
                         <button onClick={irTelaDefinirNovaSenha} className='rec'>Alterar a Senha</button> 

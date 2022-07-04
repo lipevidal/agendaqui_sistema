@@ -8,13 +8,12 @@ import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons'
 import Codigos from '../Components/Codigos';
 import NovaSenha from '../Components/NovaSenha';
 
-const element = <FontAwesomeIcon icon={faArrowLeftLong} className='i-seta'/>
+const iconeSetaVoltar = <FontAwesomeIcon icon={faArrowLeftLong} className='i-seta'/>
 
 const ContainerRecuperarSenha = styled.div`
-    background-color: #141f36;
+    background-color: var(--cor-bg-escura);
     height: 100vh;
-    color: #ececf6;
-    margin: 0;
+    color: var(--cor-texto-branca);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -59,8 +58,9 @@ const ContainerRecuperarSenha = styled.div`
             align-items: center;
             input {
                 font-size: 1.1em;
+                margin: 15px;
                 text-align:center;
-                width: 150px;
+                width: 200px;
                 padding: 10px 15px;
                 letter-spacing: 2px;
                 background-color: #2d3d547e;
@@ -68,14 +68,6 @@ const ContainerRecuperarSenha = styled.div`
                 outline: none;
                 color: #ececf6;
                 border: none;
-            }
-            p.erro{
-            margin-top: 1px;
-            margin-left: 5px;
-            font-size: 0.8em;
-            text-align: left;
-            color: red;
-            height: 15px;
             }
         }
         button {
@@ -98,6 +90,9 @@ const ContainerRecuperarSenha = styled.div`
             }
         }
     }
+    .erro-texto{
+        margin-top: -5px;
+    }
 `
 
 export default function RecuperarSenha() {
@@ -119,13 +114,14 @@ export default function RecuperarSenha() {
         axios.get(`http://localhost:8000/api/user?filtroTelefone=telefone:=:${telefone}`, {
         }).then((response) => {
             if(response.data[0]) {
+                console.log('Fiz uma requisição para buscar telefone na Api e deu certo')
                 setUsuario(response.data[0])
                 gerarCodigoTelefone()
             } else {
                 setErro('Telefone não encontrado')
             }
         }).catch((err) => {
-            console.log(err)
+            console.log('Fiz uma requisição para buscar telefone na Api e deu errado')
         })
     }
 
@@ -133,20 +129,18 @@ export default function RecuperarSenha() {
         axios.get(`http://localhost:8000/api/user?filtroEmail=email:=:${email}`, {
         }).then((response) => {
             if(response.data[0]) {
-                console.log('Deu certo, encontrei o email que é:')
-                console.log(response.data[0].email)
+                console.log('Fiz uma requisição para buscar email na Api e deu certo')
                 setUsuario(response.data[0])
                 gerarCodigoEmail()
             } else {
                 setErro('Email não encontrado')
             }
         }).catch((err) => {
-            console.log(err)
+            console.log('Fiz uma requisição para buscar telefone na Api e deu errado')
         })
     }
 
     const gerarCodigoTelefone = () => {
-        console.log(telefone)
         const body = {
             template: true,
             telefone: telefone
@@ -157,17 +151,16 @@ export default function RecuperarSenha() {
             Accept: 'application/json'
           }
         }).then((response) => {
-          console.log(response.data)
-          setCodigo(response.data)
-          setTemplate(false)
+            console.log('Fiz uma requisição na API para enviar um codigo no telefone do usuario e deu certo')
+            console.log(response.data)
+            setCodigo(response.data)
+            setTemplate(false)
         }).catch((err) => {
-          console.log(err.response.data)
+            console.log('Fiz uma requisição na API para enviar um codigo no telefone do usuario e deu errado')
         })
     }
 
     const gerarCodigoEmail = () => {
-        console.log(email)
-        console.log('Vou gerar o código que é:')
         let numeroAleatorio = Math.floor(Math.random() * (999999 - 111111)) + 111111
         console.log(numeroAleatorio)
         axios.get(`http://localhost:8000/api/envio-email?email=${email}&numeroAleatorio=${numeroAleatorio}`, {
@@ -175,12 +168,11 @@ export default function RecuperarSenha() {
             Accept: 'application/json'
           }
         }).then((response) => {
-            console.log('Enviei o email')
-          console.log(response.data)
-          setCodigo(numeroAleatorio)
-          setTemplate(false)
+            console.log('Fiz uma requisição na API para enviar um codigo no email do usuario e deu certo')
+            setCodigo(numeroAleatorio)
+            setTemplate(false)
         }).catch((err) => {
-          console.log(err)
+            console.log('Fiz uma requisição na API para enviar um codigo no email do usuario e deu errado')
         })
     }
 
@@ -209,11 +201,10 @@ export default function RecuperarSenha() {
               Accept : 'application/json'
             }
           }).then((response) => {
-            console.log(response.data)
+            console.log('Fiz uma requisição na API para alterar a senha do usuario e deu certo')
             window.location.href = 'http://localhost:3000/login'
-            //let tel = telefone.replace(/[^0-9]/g,'')
           }).catch((err) => {
-            console.log(err.response.data.errors)
+            console.log('Fiz uma requisição na API para alterar a senha do usuario e deu errado')
             setErro(err.response.data.errors.password)
           })
         }
@@ -234,25 +225,29 @@ export default function RecuperarSenha() {
     }
 
     const pegarEmail = (event) => {
+        setErro('')
         setEmail(event.target.value)
     }
 
     const pegarVerificacaoCodigo = (event) => {
+        setErro('')
         setConfirmacaoCodigo(event.target.value)
     }
 
     const pegarSenha = (event) => {
+        setErro('')
         setSenha(event.target.value)
     }
 
     const pegarSenhaRepetida = (event) => {
+        setErro('')
         setSenhaRepetida(event.target.value)
     }
 
   return (
     <ContainerRecuperarSenha>
         <Link to='/login' className='icone'>
-            {element}
+            {iconeSetaVoltar}
         </Link>
         {telaTelefone || telaEmail ? (telaTelefone ? (telaEmail ? 
         '' 
@@ -284,7 +279,7 @@ export default function RecuperarSenha() {
             <div class="conteudo">
                 <p>Olá Digite o telefone cadastrado</p>
                 <InputMask mask="(99)99999-9999" value={telefone} onChange={pegarTelefone} placeholder='Telefone' autoComplete='none'/>
-                <p className='erro'>{erro}</p>
+                <p className='erro-texto'>{erro}</p>
                 <button onClick={buscarTelefone}>Enviar</button>
             </div>
             }
@@ -317,7 +312,7 @@ export default function RecuperarSenha() {
             <div className='conteudo'>
                 <p>Digite o email cadastrado</p>
                 <input value={email.trim()} onChange={pegarEmail} placeholder='Email' autoComplete='none'/>
-                <p className='erro'>{erro}</p>
+                <p className='erro-texto'>{erro}</p>
                 <button onClick={buscarEmail}>Enviar</button>
             </div>
             }

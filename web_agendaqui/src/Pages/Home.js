@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components';
+import axios from 'axios';
 import App from '../layouts/App';
+import { Link } from 'react-router-dom';
+import Negocios from '../Components/Negocios';
+import { useSelector, useDispatch } from 'react-redux'
+import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
 
 const ContainerHome = styled.div`
   background-color: #2d3d54;
@@ -11,18 +16,20 @@ const ContainerHome = styled.div`
 `
 
 export default function Home() {
-  const { token } = useParams()
+  const [user, setUser] = useState({})
+  const [form, setForm] = useState({nome: '', email: ''})
 
-  // useEffect(() => {
+  const dispatch = useDispatch()
+  const token = localStorage.getItem('token-agendaqui')
 
-  // }, [perfil])
+  const pegarForm = (e) => {
+    setForm({...form, [e.target.name]: e.target.value})
+  }
 
   return (
     <ContainerHome>
       <App>
-        <div className='center'>
-          <div>Home</div>
-        </div>
+        
       </App>
     </ContainerHome>
   );

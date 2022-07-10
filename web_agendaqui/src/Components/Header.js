@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import Negocios from './Negocios';
+import Negocios from '../Pages/Negocios';
 import Logo_agendaqui_laranja from '../imagens/logo_agendaqui/logo-agendaqui-laranja.png'
 import IconeSino from '../imagens/icones/bell.png'
 import IconeCalendario from '../imagens/icones/calendario.png'
@@ -189,10 +189,10 @@ export default function Header() {
                             <p className='web'>Agendamentos</p>
                         </Link>
 
-                        <button onClick={abrirFecharAbaNegocio} className='box-icone'>
+                        <Link to="/negocios" className='box-icone'>
                             <img src={IconeMaleta} className='mobile' />
                             <p className='web'>Negócios</p>
-                        </button>
+                        </Link>
                     </Links>
 
                     <Perfil>
@@ -215,22 +215,7 @@ export default function Header() {
 
                 </Cabecalho>
             </div>
-        {
-            paginaNegocio ?
-                <BoxNegocio className='scale-up-tr'>
-                    {token ? 
-                        <Negocios 
-                            onclickfecharAbaNegocios={abrirFecharAbaNegocio}
-                        />
-                    : 
-                    <div className='box-erro'>
-                        <h3>Faça o login para acessar os negócios</h3>
-                        <Link className='botao' to="/login">Login</Link>
-                    </div>
-                    }
-                </BoxNegocio>
-            : ''
-        }
+        
     </ContainerHeader>
   );
 }

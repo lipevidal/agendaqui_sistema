@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import InputMask from "react-input-mask";
+import { useDispatch } from 'react-redux'
+import { getUser } from '../store/Users/Users.fetch.actions'
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowLeftLong } from '@fortawesome/free-solid-svg-icons'
@@ -26,6 +28,12 @@ const ContainerCadastro = styled.div`
         color: var(--cor-texto-branca);
         font-size: 2em;
       }
+    }
+    .form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .boxCodigo {
         display: flex;
@@ -62,7 +70,8 @@ const ContainerCadastro = styled.div`
     }
 `
 
-export default function Cadastro() {
+export default function Cadastro(props) {
+    const dispatch = useDispatch()
     const [nome, setNome] = useState(''.trim())
     const [telefone, setTelefone] = useState('')
     const [email, setEmail] = useState('')
@@ -128,11 +137,34 @@ export default function Cadastro() {
               }
             }).then(() => {
               console.log('Fiz uma requisição de cadastro e deu certo')
-              window.location.href = 'http://localhost:3000'
+              Entrar()
+              props.history.push('/')
             }).catch((err) => {
               console.log('Fiz uma requisição de cadastro e deu errado')
             })
         }
+    }
+
+    const Entrar = () => {
+      const body = {
+        email: email,
+        password: senha
+      }
+      axios.post('http://localhost:8000/api/login', body, {
+        headers: {
+          Accept : 'application/json'
+        }
+      }).then((response) => {
+        localStorage.removeItem('token-agendaqui')
+        console.log('Fiz uma requisição de login na Api e deu certo')
+        const dados = response.data.token
+        localStorage.setItem('token-agendaqui', dados)
+        dispatch(getUser(dados))
+        props.history.push('/')
+      }).catch((err) => {
+        console.log('Fiz uma requisição de login e deu errado')
+      })
+    
     }
 
     const pegarNome = (event) => {

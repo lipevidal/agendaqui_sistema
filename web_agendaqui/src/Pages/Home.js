@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import axios from 'axios';
 import App from '../layouts/App';
 import { Link } from 'react-router-dom';
-import Negocios from '../Components/Negocios';
 import { useSelector, useDispatch } from 'react-redux'
 import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
 
@@ -13,6 +12,7 @@ const ContainerHome = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-top: 100px;
 `
 
 export default function Home() {
@@ -26,10 +26,18 @@ export default function Home() {
     setForm({...form, [e.target.name]: e.target.value})
   }
 
+  const unidades = useSelector((state) => {
+    return state.todasUnidades
+  })
+
+  const listUnidades = unidades.map((unidade, index) => {
+    return <p key={index}>{unidade.nome}</p>
+  })
+
   return (
     <ContainerHome>
       <App>
-        
+        {listUnidades}
       </App>
     </ContainerHome>
   );

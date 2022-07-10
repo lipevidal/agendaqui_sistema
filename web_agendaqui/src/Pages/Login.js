@@ -74,6 +74,7 @@ export default function Login(props) {
             Accept : 'application/json'
           }
         }).then((response) => {
+          localStorage.removeItem('token-agendaqui')
           console.log('Fiz uma requisição de login na Api e deu certo')
           const dados = response.data.token
           localStorage.setItem('token-agendaqui', dados)

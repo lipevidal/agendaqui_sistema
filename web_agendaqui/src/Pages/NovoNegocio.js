@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
+import api from "../services/api";
 import App from '../layouts/App';
 import styled from 'styled-components';
 import ImagemPadrao from '../imagens/perfilneutra.jpg'
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux'
+import { addNegocios, addNegocio } from "../store/Negocios/Negocios.actions";
 import { Link } from 'react-router-dom';
+import { postNegocios } from '../store/Negocios/Negocios.fetch.actions';
 
 const ContainerNovoNegocio = styled.div`
     background-color: #2d3d54;
-    min-height: 100vh;
+    min-height: calc(100vh - var(--altura-header));
+    margin-top: var(--altura-header);
+    padding-bottom: var(--altura-header);
     display: flex;
     flex-direction: column;
     .form {
@@ -18,20 +24,20 @@ const ContainerNovoNegocio = styled.div`
         justify-content: center;
         h2 {
             color: white;
-            margin: 30px;
+            margin: 10px;
         }
         .box-imagem {
-            margin: 20px;
+            margin-top: 10px;
             width: 120px;
             height: 120px;
             background-color: #eee;
-            border-radius: 50%;
+            border-radius: 10%;
             box-shadow: 0 0 5px #000;
             background-image: url(ImagemPadrao);
             img {
                 width: 100%;
                 height: 100%;
-                border-radius: 50%;
+                border-radius: 10%;
                 object-fit: cover;
                 cursor: pointer;
             }
@@ -39,27 +45,26 @@ const ContainerNovoNegocio = styled.div`
         input#inputImg {
             display:none;
         }
+        
         .box-inputs {
           display: flex;
           flex-direction: column;
-          padding-bottom: 25px;
           position: relative;
           input {
             font-size: 1.1em;
-            text-align: center;
-            width: 250px;
-            padding: 10px 15px;
+            text-align: left;
+            width: 280px;
             letter-spacing: 2px;
-            background-color: transparent;
+            background-color: #141f3687;
             outline: none;
             color: #ececf6;
-            border: none;
-            border-bottom: 1px solid orange;
+            box-shadow: 0 0 5px #000; 
           }
         }
         p, .erro{
           margin-top: 1px;
           margin-left: 5px;
+          margin-bottom: 15px;
           font-size: 0.8em;
           text-align: center;
           color: red;
@@ -78,9 +83,11 @@ const ContainerNovoNegocio = styled.div`
             }
         }
     }
+
 `
 
-export default function NovoNegocio() {
+export default function NovoNegocio(props) {
+    const dispatch = useDispatch()
     const token = localStorage.getItem('token-agendaqui')
     const [nomeNegocio, setNomeNegocio] = useState('')
     const [erroNomeNegocio, setErroNomeNegocio] = useState('')
@@ -94,31 +101,36 @@ export default function NovoNegocio() {
     const [imagemPadrao, setImagemPadrao] = useState(ImagemPadrao)
     const [user, setUser] = useState({})
 
+    const userId = useSelector((state) => {
+        return state.user.id
+      })
+
     const criarNegocio = () => {
         buscarDados()
         let formData = new FormData();
-        formData.append('user_id', user.id)
+        formData.append('user_id', userId)
         formData.append('nome', nomeNegocio)
         formData.append('categoria', categoria)
         formData.append('nome_da_pagina', nomePagina)
         formData.append('logo', logo)
         
-        axios.post('http://localhost:8000/api/v1/negocio', formData, {
-        headers: {
-            'Accept' : 'application/json',
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`
-        }
-        }).then((response) => {
-            console.log(response.data)
-            window.location.href = 'http://localhost:3000'
-        }).catch((err) => {
-            console.log(err.response)
-            setErroNomeNegocio(err.response.data.errors.nome)
-            setErroCategoria(err.response.data.errors.categoria)
-            setErroNomePagina(err.response.data.errors.nome_da_pagina)
-            setErroLogo(err.response.data.errors.logo)
-        })
+        api.post('/api/v1/negocio', formData, {
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            }
+            }).then((res) => {
+                console.log(res.data)
+                dispatch(addNegocio(res.data))
+                props.history.push('/negocios')
+            }).catch((err) => {
+                console.log(err.response)
+                setErroCategoria(err.response.data.errors.categoria)
+                setErroNomeNegocio(err.response.data.errors.nome)
+                setErroNomePagina(err.response.data.errors.nome_da_pagina)
+                setErroLogo(err.response.data.errors.logo)
+            })
     }
 
     const buscarDados = () => {
@@ -152,6 +164,11 @@ export default function NovoNegocio() {
         setNomePagina(event.target.value)
     }
 
+    const pegarLogo = (e) => {
+        setErroLogo('')
+        setLogo(e.target.files[0])
+    }
+
     const clicarImg = () => {
         let file = document.getElementById('inputImg')
         file.click();
@@ -173,15 +190,27 @@ export default function NovoNegocio() {
                         }
                     </div>
                     <p className='erro'>{erroLogo}</p>
-                    <input type="file" id='inputImg' accept=".png, .jpg, .jpeg" onChange={e => setLogo(e.target.files[0])}/>
+                    <input type="file" id='inputImg' accept=".png, .jpg, .jpeg" onChange={pegarLogo}/>
                     {/* { logo ? <button onClick={excluirPhoto} className='del'>Excluir</button> : '' } */}
                     <div className='box-inputs'>
-                        <input value={nomeNegocio} onChange={pegarNomeNegocio} placeholder='Nome do negócio' autoComplete='none'/>
-                        <p>{erroNomeNegocio}</p>
-                        <input value={categoria} onChange={pegarCategoria} placeholder='Categoria.. Ex: Barbearia' autoComplete='none'/>
-                        <p>{erroCategoria}</p>
-                        <input value={nomePagina.trim()} onChange={pegarNomePagina} placeholder='Nome da página' autoComplete='none'/>
-                        <p>{erroNomePagina}</p>
+                        <div className="label-float">
+                            <input className='primeira-maiuscula' value={nomeNegocio} onChange={pegarNomeNegocio} placeholder=" " autoComplete='none' required/>
+                            <label>Nome do negócio</label>
+                        </div>
+                        <p className='erro-texto'>{erroNomeNegocio}</p>
+
+                        <div className="label-float">
+                            <input className='primeira-maiuscula' value={categoria} onChange={pegarCategoria} placeholder=" " autoComplete='none' required/>
+                            <label>Categoria.. Ex: Barbearia</label>
+                        </div>
+                        <p className='erro-texto'>{erroCategoria}</p>
+
+                        <div className="label-float">
+                            <input value={nomePagina.trim()} onChange={pegarNomePagina} placeholder=" " autoComplete='none' required/>
+                            <label>Nome da página</label>
+                        </div>
+                        <p className='erro-texto'>{erroNomePagina}</p>
+                    
                     </div>
                     <button onClick={criarNegocio}>Enviar</button>
                 </div>

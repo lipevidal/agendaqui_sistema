@@ -15,6 +15,8 @@ import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '..
 import store from '../store/store'
 import { DetalhesUser } from '../context/UserContext';
 import Loading from './Loading';
+import Negocios from '../Pages/Negocios';
+import MeuNegocio from '../Pages/MeuNegocio';
 
 export default function Routes() {
   const dispatch = useDispatch()
@@ -24,7 +26,10 @@ export default function Routes() {
   
   useEffect(() => {
     if(token) {
+      console.log('Token existe vou chamar a função getUser')
       dispatch(getUser(token))
+    } else {
+      console.log('Token não existe, não faço requisição')
     }
   }, [])
 
@@ -41,6 +46,8 @@ export default function Routes() {
             <PrivateRoute exact path="/favorito" component={Favoritos} />
             <PrivateRoute exact path="/agendamento" component={Agendamentos} />
             <PrivateRoute exact path="/novo-negocio" component={NovoNegocio} />
+            <PrivateRoute exact path="/negocios" component={Negocios} />
+            <PrivateRoute exact path="/negocio/:nome_negocio" component={MeuNegocio} />
             <Route exact path="/erro" component={Erro} />
         </Switch>
     </BrowserRouter>

@@ -24,6 +24,7 @@ Route::prefix('v1')->middleware('jwt.auth')->group(function() {
     Route::post('me', 'App\Http\Controllers\AuthController@me');
     Route::post('logout', 'App\Http\Controllers\AuthController@logout');
     Route::apiResource('negocio', 'App\Http\Controllers\NegocioController');
+    Route::apiResource('unidade', 'App\Http\Controllers\UnidadeController');
 });
 
 Route::get('user', 'App\Http\Controllers\UserController@index');
@@ -35,6 +36,8 @@ Route::delete('user/{id}', 'App\Http\Controllers\UserController@destroy');
 
 Route::post('login', 'App\Http\Controllers\AuthController@login');
 Route::post('refresh', 'App\Http\Controllers\AuthController@refresh');
+
+Route::get('unidade', 'App\Http\Controllers\UnidadeController@index');
 
 Route::get('envio-email', function(Request $request) {
     $user = new stdClass();

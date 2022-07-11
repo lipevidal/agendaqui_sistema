@@ -1,8 +1,9 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { addNegocios } from './Negocios.actions'
+import { addNegocios, addNegocio } from './Negocios.actions'
 
 const ESTADO_INICIAL = []
 
 export default createReducer(ESTADO_INICIAL, {
-    [addNegocios.type]: (state, action) =>  [action.payload]
+    [addNegocios.type]: (state, action) =>  action.payload,
+    [addNegocio.type]: (state, action) => [...state, action.payload]
 })

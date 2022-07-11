@@ -34,7 +34,7 @@ class Negocio extends Model
 
     public function feedback() {
         return [
-            'required' => 'O campo :attribute é obrigatório',
+            'required' => 'O :attribute é obrigatório',
             'nome.min' => 'O nome deve ter no mínimo 2 caractere',
             'categoria.min' => 'A categoria deve ter no mínimo 2 caracteres',
             'nome_da_pagina.min' => 'O nome da página deve ter no mínimo 2 caracteres',
@@ -45,5 +45,9 @@ class Negocio extends Model
 
     public function user() {
         return $this->belongsTo('App\Models\User');
+    }
+
+    public function unidades() {
+        return $this->hasMany('App\Models\Unidade');
     }
 }

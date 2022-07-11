@@ -10,7 +10,7 @@ class NegocioController extends Controller
     /**
      * Undocumented function
      *
-     * @param User $user
+     * @param Negocio $negocio
      */
     public function __construct(Negocio $negocio)
     {
@@ -53,7 +53,7 @@ class NegocioController extends Controller
             'nome_da_pagina' => $request->nome_da_pagina
         ]);
 
-        return response()->json(['sucesso' => $negocio], 200);
+        return $negocio;
     }
 
     /**

@@ -12,7 +12,7 @@ export default function Agendamentos() {
             <div className='center'>
                 <div>Agendamentos</div>
             </div>
-      </App>
+        </App>
     </div>
   );
 }

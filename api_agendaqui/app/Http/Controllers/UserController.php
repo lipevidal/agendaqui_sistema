@@ -77,14 +77,14 @@ class UserController extends Controller
             return $numeroAleatorio;
         }
         
-        $this->user->create([
+        $user = $this->user->create([
             'nome' => $request->nome,
             'email' => $request->email,
             'telefone' => $request->telefone,
             'password' => bcrypt($request->password)
         ]);
 
-        return response()->json(['sucesso' => 'Usuário criado com sucesso'], 201);
+        return $user;
     }
 
     /**
@@ -117,7 +117,7 @@ class UserController extends Controller
             if($request->excluir) {
                 Storage::disk('public')->delete($user->foto_do_perfil);
                 $user->update($request->all());
-                return response()->json(['sucesso' => 'Foto deletada com sucesso'], 200);
+                return $user;
             } else {
                 $regrasDinamicas = array();
 
@@ -140,10 +140,10 @@ class UserController extends Controller
                         'telefone' => $request->telefone,
                         'foto_do_perfil' => $imagem_urn
                     ]);
-                    return response()->json(['sucesso' => 'Atualização realizada com sucesso'], 200);
+                    return $user;
                 } else {
                     $user->update($request->all());
-                    return response()->json(['sucesso' => 'Atualização realizada com sucesso'], 200);
+                    return $user;
                 }
             }
 
@@ -157,7 +157,7 @@ class UserController extends Controller
                 'password' => bcrypt($request->password)
             ]);
     
-            return response()->json(['sucesso' => 'Atualização realizada com sucesso'], 200);
+            return $user;
         }
 
     }

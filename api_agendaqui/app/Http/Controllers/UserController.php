@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Comtele\Services\TextMessageService;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -81,7 +82,11 @@ class UserController extends Controller
             'nome' => $request->nome,
             'email' => $request->email,
             'telefone' => $request->telefone,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'ceo' => false,
+            'afiliado' => false,
+            'adm' => false,
+            'atualizar' => date('Y/m/d')
         ]);
 
         return $user;

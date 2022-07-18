@@ -26,6 +26,8 @@ class CreateUnidadesTable extends Migration
             $table->string('bairro');
             $table->string('cidade');
             $table->string('estado');
+            $table->string('status');
+            $table->date('vencimento');
             $table->timestamps();
         });
     }

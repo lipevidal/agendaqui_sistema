@@ -20,6 +20,8 @@ class Negocio extends Model
         'logo',
         'categoria',
         'nome_da_pagina',
+        'codigo_afiliado',
+        'dias_inativos',
     ];
 
     public function rules() {

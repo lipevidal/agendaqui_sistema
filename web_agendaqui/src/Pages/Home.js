@@ -100,6 +100,7 @@ export default function Home() {
     setForm({...form, [e.target.name]: e.target.value})
   }
 
+  //Todas as unidades do store
   const unidades = useSelector((state) => {
     return state.todasUnidades
   })

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
 import InputMask from "react-input-mask";
+import { addUnidade } from '../store/Unidades/Unidades.actions'
 import { getUser } from '../store/Users/Users.fetch.actions';
 import store from '../store/store';
 import IconeSetaDireita from '../imagens/icones/seta-direita.png'
@@ -211,6 +212,15 @@ const CriarUnidade = styled.div`
     font-size: 0.8em;
     margin: -10px 0 0 15px;
   }
+  .erro-final{
+    color: red;
+    text-align: center;
+    font-size: 0.8em;
+    margin: 20px;
+  }
+  .contorno-erro {
+    border: 1px solid red;
+  }
   h5 {
     border-bottom: 1px solid red;
     font-size: 1em;
@@ -219,7 +229,7 @@ const CriarUnidade = styled.div`
   .botao-salvar {
     display: flex;
     justify-content: center;
-    margin: 20px;
+    margin-bottom: 20px;
   }
   .campo-input {
     display: flex;
@@ -243,9 +253,15 @@ const CriarUnidade = styled.div`
       color: #ececf6;
       margin-left: 8px;
     }
+    input.nome {
+      text-transform: capitalize;
+    }
+    input.link-whatsapp{
+      text-transform: lowercase;
+    }
   }
   .gerar-link {
-    margin-left: 15px;
+    margin-left: 20px;
     margin-top: -10px;
     margin-bottom: 10px;
     width: 100%;
@@ -284,13 +300,11 @@ export default function MeuNegocio() {
     const [telaEditarNegocio, setTelaEditarNegocio] = useState(false)
     const [telaCriarUnidade, setTelaCriarUnidade] = useState(false)
     const [imagem, setImagem] = useState('')
+    const [nome, setNome] = useState('')
     const [endereco, setEndereco] = useState({})
-    const [erro, setErro] = useState({
-      nome: '',
-      contato: '',
-      cep: '',
-      numero: '',
-    })
+    const [erroCep, setErroCep] = useState('')
+    const [erro, setErro] = useState('')
+    const [erros, setErros] = useState({})
     const [unidade, setUnidade] = useState({
       nome: '',
       link_whatsapp: '',
@@ -325,20 +339,21 @@ export default function MeuNegocio() {
         .then((res) => {
           console.log(res.data)
           if(res.data.erro) {
-            setErro({cep: 'Cep inválido'})
+            setErroCep('Cep inválido')
           } else {
             setEndereco(res.data)
           }
         }).catch((err) => {
           console.log(err)
-          setErro({cep: 'Cep inválido'})
+          setErroCep('Cep inválido')
         })
       }
 
       const salvarUnidade = () => {
-        if(erro.cep) {
-          setErro({cep: 'Digite um cep válido'})
+        if(erroCep) {
+          setErro('Digite um cep válido')
         } else {
+          console.log(unidade)
           const body = {
             negocio_id: negocioUser[0].id,
             nome: unidade.nome,
@@ -352,6 +367,7 @@ export default function MeuNegocio() {
             cidade: endereco.localidade,
             estado: endereco.uf,
           }
+          console.log(body)
           api.post('/api/v1/unidade', body, {
             headers: {
               'Accept': 'application/json',
@@ -359,9 +375,12 @@ export default function MeuNegocio() {
             }
           })
             .then((res) => {
-              console.log(res)
+              console.log(res.data)
+              dispatch(addUnidade(res.data))
             }).catch((err) => {
-              console.log(err.response.data)
+              console.log(err.response.data.errors)
+              setErros(err.response.data.errors)
+              setErro('Preencha todos os campos obrigatórios')
             })
           }
       }
@@ -377,18 +396,17 @@ export default function MeuNegocio() {
         setImagem('')
       }
 
-      const pegarCep = (e) => {
-        setErro({cep: ''})
-        setUnidade({cep: e.target.value})
-      }
-
       const pegarDados = (e) => {
-        setUnidade({[e.target.name]: e.target.value})
+        e.preventDefault();
+        setErroCep('')
+        setErro('')
+        setErros({...erros, [e.target.name]: ''})
+        setUnidade({...unidade, [e.target.name]: e.target.value})
       }
 
       const listUnidades = unidadeNegocio.map((unidade) => {
         return (
-        <Link to={`/negocio/${nome_negocio}/${unidade.nome}`} className='link'>
+        <Link key={unidade.id} to={`/negocio/${nome_negocio}/${unidade.nome}`} className='link'>
           <div></div>
           <div>
             <h1>{unidade.nome}</h1>
@@ -441,33 +459,37 @@ export default function MeuNegocio() {
                   <h2>Nova Unidade</h2>
                   <div></div>
                 </div>
-                <div className='form'>
 
-                  <div className='campo-input'>
+                <div className='form'>
+                  <div className={erros.nome ? 'campo-input contorno-erro': 'campo-input'}>
                     <label>Nome*:</label>
-                    <input placeholder='Nome da unidade' value={unidade.nome} name='nome' onChange={pegarDados} autoComplete="none"/>
+                    <input placeholder='Nome da unidade' value={unidade.nome} name='nome' onChange={pegarDados} autoComplete="none" className='nome'/>
                   </div>
 
                   <div className='campo-input'>
                     <label>Link do WhatsApp:</label>
-                    <input placeholder='https://linkdowhatsapp.com' value={unidade.link_whatsapp} name='link_whatsapp' onChange={pegarDados} autoComplete="none"/>
+                    <input placeholder='https://linkdowhatsapp.com' value={unidade.link_whatsapp.trim()} name='link_whatsapp' onChange={pegarDados} autoComplete="none" className='link-whatsapp'/>
                   </div>
 
                   <div className='gerar-link'>
                     <a href='https://a.umbler.com/gerador-de-link-whatsapp?gclid=Cj0KCQjwidSWBhDdARIsAIoTVb2KCAz7D_STsAvDcrh97KDPtJkDrChsPuZk9EZWa7sCHIAfmZl7L-UaAt9gEALw_wcB' target='_blank'>Gerar link aqui</a>
                   </div>
 
-                  <div className='campo-input contato'>
+                  <div className={erros.contato ? 'campo-input contato contorno-erro': 'campo-input contato'}>
                     <label>Contato*:</label>
                     <InputMask mask="(99)9999-99999" placeholder='(00)0000-00000' value={unidade.contato} name='contato' onChange={pegarDados} autoComplete="none"/>
                   </div>
+
                   <h5>Endereço</h5>
+
                   <div className='cep'>
-                    <div className='campo-input'>
+
+                    <div className={erros.cep ? 'campo-input contorno-erro': 'campo-input'}>
                       <label>Cep*:</label>
-                      <InputMask mask="99999-999" placeholder='00000-000' value={unidade.cep} name='cep' onChange={pegarCep} onBlur={buscarCep} autoComplete="none"/>
+                      <InputMask mask="99999-999" placeholder='00000-000' value={unidade.cep} name='cep' onChange={pegarDados} onBlur={buscarCep} autoComplete="none"/>
                     </div>
-                    <p className='erro'>{erro.cep}</p>
+                    <p className='erro'>{erroCep}</p>
+
                   </div>
 
                   <div className='rua-numero'>
@@ -476,7 +498,7 @@ export default function MeuNegocio() {
                       <input placeholder='Av. Brasil' value={endereco.logradouro} autoComplete="none" disabled/>
                     </div>
 
-                    <div className='campo-input numero'>
+                    <div className={erros.numero ? 'campo-input numero contorno-erro': 'campo-input numero'}>
                       <label>N°*:</label>
                       <input placeholder='25' value={unidade.numero} name='numero' onChange={pegarDados} autoComplete="none"/>
                     </div>
@@ -506,6 +528,9 @@ export default function MeuNegocio() {
                     </div>
                   </div>
                 </div>
+
+                <p className='erro-final'>{erro}</p>
+
                 <div className='botao-salvar'>
                   <button className='botao-sucesso' onClick={salvarUnidade}>Salvar</button>
                 </div>

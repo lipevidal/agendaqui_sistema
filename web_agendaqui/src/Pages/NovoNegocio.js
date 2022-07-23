@@ -11,9 +11,8 @@ import { postNegocios } from '../store/Negocios/Negocios.fetch.actions';
 
 const ContainerNovoNegocio = styled.div`
     background-color: #2d3d54;
-    min-height: calc(100vh - var(--altura-header));
-    margin-top: var(--altura-header);
-    padding-bottom: var(--altura-header);
+    min-height: 100vh;
+    padding-top: 10px;
     display: flex;
     flex-direction: column;
     .form {
@@ -82,6 +81,11 @@ const ContainerNovoNegocio = styled.div`
                 background-color: #4eca7a;
             }
         }
+    }
+    @media (max-width: 600px) {
+      margin-top: calc(var(--altura-header) - 10px);
+      min-height: calc(100vh - var(--altura-header));
+      padding-bottom: var(--altura-header);
     }
 
 `
@@ -208,6 +212,12 @@ export default function NovoNegocio(props) {
                         <div className="label-float">
                             <input value={nomePagina.trim()} onChange={pegarNomePagina} placeholder=" " autoComplete='none' required/>
                             <label>Nome da página</label>
+                        </div>
+                        <p className='erro-texto'>{erroNomePagina}</p>
+
+                        <div className="label-float">
+                            <input placeholder=" " autoComplete='none' required/>
+                            <label>Cupom de desconto</label>
                         </div>
                         <p className='erro-texto'>{erroNomePagina}</p>
                     

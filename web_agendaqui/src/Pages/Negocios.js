@@ -9,8 +9,7 @@ import IconeSetaDireita from '../imagens/icones/seta-direita.png'
 
 const ContainerNegocios = styled.div`
     background-color: #2d3d54;
-    min-height: calc(100vh - var(--altura-header));
-    margin-top: var(--altura-header);
+    min-height: 100vh;
     .center {
       display: flex;
       flex-direction: column;
@@ -32,6 +31,7 @@ const ContainerNegocios = styled.div`
           width: 40px;
           height: 40px;
           border-radius: 10%;
+          background-color: white;
         }
         h2 {
           color: white;
@@ -81,6 +81,11 @@ const ContainerNegocios = styled.div`
       font-size: 1.2em;
       text-align: center;
     }
+
+    @media (max-width: 600px) {
+      margin-top: calc(var(--altura-header) - 10px);
+      min-height: calc(100vh - var(--altura-header));
+    }
 `
 
 export default function Negocios(props) {
@@ -126,7 +131,7 @@ export default function Negocios(props) {
               {listNegocios}
             </div> : <div className='nao-cadastrado'>Você não possui negócios cadastrados</div>
           }
-          <Link className='botao' onClick={props.onclickfecharAbaNegocios} to="/novo-negocio">+ Novo negócio</Link>
+          <Link className='botao' to="/novo-negocio">+ Novo negócio</Link>
         </div>
       </App>
     </ContainerNegocios>

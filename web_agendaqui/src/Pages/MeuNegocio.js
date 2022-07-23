@@ -3,6 +3,7 @@ import App from '../layouts/App';
 import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
+import InputMask from "react-input-mask";
 import { getUser } from '../store/Users/Users.fetch.actions';
 import store from '../store/store';
 import IconeSetaDireita from '../imagens/icones/seta-direita.png'
@@ -205,6 +206,11 @@ const CriarUnidade = styled.div`
     max-width: 400px;
     width: 100%;
   }
+  .erro {
+    color: red;
+    font-size: 0.8em;
+    margin: -10px 0 0 15px;
+  }
   h5 {
     border-bottom: 1px solid red;
     font-size: 1em;
@@ -213,6 +219,7 @@ const CriarUnidade = styled.div`
   .botao-salvar {
     display: flex;
     justify-content: center;
+    margin: 20px;
   }
   .campo-input {
     display: flex;
@@ -233,7 +240,8 @@ const CriarUnidade = styled.div`
       margin-top: 25px;
       background-color: transparent;
       border: none;
-      color: white;
+      color: #ececf6;
+      margin-left: 8px;
     }
   }
   .gerar-link {
@@ -276,34 +284,86 @@ export default function MeuNegocio() {
     const [telaEditarNegocio, setTelaEditarNegocio] = useState(false)
     const [telaCriarUnidade, setTelaCriarUnidade] = useState(false)
     const [imagem, setImagem] = useState('')
-    const [cep, setCep] = useState('')
     const [endereco, setEndereco] = useState({})
-    const [erro, setErro] = useState('')
+    const [erro, setErro] = useState({
+      nome: '',
+      contato: '',
+      cep: '',
+      numero: '',
+    })
+    const [unidade, setUnidade] = useState({
+      nome: '',
+      link_whatsapp: '',
+      contato: '',
+      cep: '',
+      numero: '',
+      complemento: ''
+    })
 
+      //retorna todos os negocios do usuário que esta na store
       const negocios = useSelector((state) => {
         return state.negocios
       })
 
+      //retorna somente o negocio da página atual
       const negocioUser = negocios.filter((negocio) => {
         return negocio.nome_da_pagina === nome_negocio
       })
 
+      //retorna todos as unidades do usuario que esta na store
       const unidades = useSelector((state) => {
         return state.unidades
       })
 
+      //retorna somente as unidades do negocio da página atual
       const unidadeNegocio = unidades.filter((unidade) => {
         return unidade.negocio_id === negocioUser[0].id
       })
 
       const buscarCep = () => {
-        api.get(`https://viacep.com.br/ws/${cep}/json/`)
+        api.get(`https://viacep.com.br/ws/${unidade.cep}/json/`)
         .then((res) => {
-          setEndereco(res.data)
+          console.log(res.data)
+          if(res.data.erro) {
+            setErro({cep: 'Cep inválido'})
+          } else {
+            setEndereco(res.data)
+          }
         }).catch((err) => {
           console.log(err)
-          setErro('Cep inválido')
+          setErro({cep: 'Cep inválido'})
         })
+      }
+
+      const salvarUnidade = () => {
+        if(erro.cep) {
+          setErro({cep: 'Digite um cep válido'})
+        } else {
+          const body = {
+            negocio_id: negocioUser[0].id,
+            nome: unidade.nome,
+            link_whatsapp: unidade.link_whatsapp,
+            contato: unidade.contato,
+            cep: endereco.cep,
+            rua: endereco.logradouro,
+            numero: unidade.numero,
+            complemento: unidade.complemento,
+            bairro: endereco.bairro,
+            cidade: endereco.localidade,
+            estado: endereco.uf,
+          }
+          api.post('/api/v1/unidade', body, {
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          })
+            .then((res) => {
+              console.log(res)
+            }).catch((err) => {
+              console.log(err.response.data)
+            })
+          }
       }
 
       const clicarImg = () => {
@@ -315,6 +375,15 @@ export default function MeuNegocio() {
         setTelaEditarNegocio(false)
         setTelaCriarUnidade(false)
         setImagem('')
+      }
+
+      const pegarCep = (e) => {
+        setErro({cep: ''})
+        setUnidade({cep: e.target.value})
+      }
+
+      const pegarDados = (e) => {
+        setUnidade({[e.target.name]: e.target.value})
       }
 
       const listUnidades = unidadeNegocio.map((unidade) => {
@@ -375,13 +444,13 @@ export default function MeuNegocio() {
                 <div className='form'>
 
                   <div className='campo-input'>
-                    <label>Nome:</label>
-                    <input placeholder='Nome da unidade'/>
+                    <label>Nome*:</label>
+                    <input placeholder='Nome da unidade' value={unidade.nome} name='nome' onChange={pegarDados} autoComplete="none"/>
                   </div>
 
                   <div className='campo-input'>
                     <label>Link do WhatsApp:</label>
-                    <input placeholder='https://linkdowhatsapp.com'/>
+                    <input placeholder='https://linkdowhatsapp.com' value={unidade.link_whatsapp} name='link_whatsapp' onChange={pegarDados} autoComplete="none"/>
                   </div>
 
                   <div className='gerar-link'>
@@ -389,55 +458,56 @@ export default function MeuNegocio() {
                   </div>
 
                   <div className='campo-input contato'>
-                    <label>Contato:</label>
-                    <input placeholder='(00)0000-00000'/>
+                    <label>Contato*:</label>
+                    <InputMask mask="(99)9999-99999" placeholder='(00)0000-00000' value={unidade.contato} name='contato' onChange={pegarDados} autoComplete="none"/>
                   </div>
                   <h5>Endereço</h5>
                   <div className='cep'>
                     <div className='campo-input'>
-                      <label>Cep:</label>
-                      <input placeholder='00000-000' value={cep} onChange={e => setCep(e.target.value)} onBlur={buscarCep}/>
+                      <label>Cep*:</label>
+                      <InputMask mask="99999-999" placeholder='00000-000' value={unidade.cep} name='cep' onChange={pegarCep} onBlur={buscarCep} autoComplete="none"/>
                     </div>
+                    <p className='erro'>{erro.cep}</p>
                   </div>
 
                   <div className='rua-numero'>
                     <div className='campo-input rua'>
-                      <label>Rua:</label>
-                      <input placeholder='Av. Brasil' value={endereco.logradouro} disabled/>
+                      <label>Rua*:</label>
+                      <input placeholder='Av. Brasil' value={endereco.logradouro} autoComplete="none" disabled/>
                     </div>
 
                     <div className='campo-input numero'>
-                      <label>N°:</label>
-                      <input placeholder='25'/>
+                      <label>N°*:</label>
+                      <input placeholder='25' value={unidade.numero} name='numero' onChange={pegarDados} autoComplete="none"/>
                     </div>
                   </div>
 
                   <div className='complemento-bairro'>
                     <div className='campo-input complemento'>
                       <label>Complemento:</label>
-                      <input placeholder='Ap 315'/>
+                      <input placeholder='Ap 315' name='complemento' onChange={pegarDados} value={unidade.complemento} autoComplete="none"/>
                     </div>
 
                     <div className='campo-input bairro'>
-                      <label>Bairro:</label>
-                      <input placeholder='Centro' value={endereco.bairro} disabled/>
+                      <label>Bairro*:</label>
+                      <input placeholder='Centro' value={endereco.bairro} autoComplete="none" disabled/>
                     </div>
                   </div>
 
                   <div className='cidade-estado'>
                     <div className='campo-input cidade'>
-                      <label>Cidade:</label>
-                      <input placeholder='Belo Horizonte' value={endereco.localidade} disabled/>
+                      <label>Cidade*:</label>
+                      <input placeholder='Belo Horizonte' value={endereco.localidade} autoComplete="none" disabled/>
                     </div>
 
                     <div className='campo-input estado'>
-                      <label>UF:</label>
-                      <input placeholder='MG' value={endereco.uf} disabled/>
+                      <label>UF*:</label>
+                      <input placeholder='MG' value={endereco.uf} autoComplete="none" disabled/>
                     </div>
                   </div>
                 </div>
                 <div className='botao-salvar'>
-                  <button className='botao-sucesso'>Salvar</button>
+                  <button className='botao-sucesso' onClick={salvarUnidade}>Salvar</button>
                 </div>
               </CriarUnidade>
               :

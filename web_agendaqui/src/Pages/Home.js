@@ -132,7 +132,7 @@ export default function Home() {
           {unidades.length > 0 &&
           <ListUnidades>
             {listUnidades}
-            <i class="fi fi-rr-envelope"></i>
+            <i className="fi fi-rr-envelope"></i>
           </ListUnidades>}
         </div>
       </App>

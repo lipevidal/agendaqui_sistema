@@ -91,6 +91,29 @@ const BoxLista = styled.div`
     align-items: center;
     max-width: 450px;
     width: 100%;
+    .titulo-lista {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .nome-negocio {
+      margin-bottom: 10px;
+      text-align: center;
+      button {
+        font-size:0.8em;
+        background-color: orange;
+        cursor: pointer;
+        border: none;
+        padding: 5px;
+        border-radius: 3px;
+      }
+    }
+    h1 {
+      margin: 5px;
+      text-transform: uppercase;
+    }
     h2 {
       text-transform: capitalize;
     }
@@ -99,15 +122,22 @@ const BoxLista = styled.div`
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-top: 1px solid #ccc;
       border-bottom: 1px solid #ccc;
       padding: 10px;
-      button {
+      button.img-config {
         display: flex;
         justify-content: center;
         align-items: center;
         font-size: 1.5em;
         width: 35px;
         height: 35px;
+      }
+      button.botao-sucesso {
+        font-size:0.8em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
     .img-config {
@@ -135,12 +165,28 @@ const ListUnidades = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  .botoes {
+    white-space: nowrap;
+    button {
+      margin: 0 5px;
+      border: none;
+      padding: 5px;
+      border-radius: 3px;
+      cursor: pointer;
+      color: white;
+    }
+    button.acessar {
+      background-color: #2d6cea;
+    }
+    button.editar {
+      background-color: #ff895f;
+    }
+  }
   h2 {
     color: red;
   }
   .link {
     text-decoration: none;
-    text-align: center;
     width: 100%;
     margin: 10px;
     border-radius: 10px;
@@ -148,12 +194,15 @@ const ListUnidades = styled.div`
     background-color: #141f3687;
     border: none;
     border-bottom: 3px solid red;
-    cursor: pointer;
     color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
     overflow: hidden;
+    .unidade-status {
+      display: flex;
+      justify-content: start;
+    }
     img {
       width: 40px;
       height: 40px;
@@ -162,11 +211,13 @@ const ListUnidades = styled.div`
     .status {
       display: flex;
       justify-content: center;
+      align-items: center;
+      margin: 0 15px 0 5px;
+      font-size: 0.5em;
     }
     h1 {
-      margin: 5px;
       text-transform: uppercase;
-      font-size: 1.6em;
+      font-size: 1.5em;
     }
   }
 `
@@ -179,13 +230,26 @@ const NaoUnidade = styled.div`
 `
 
 const EditarNegocio = styled.div`
-
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 450px;
+  width: 100%;
+  .topo {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  h2 {
+    margin-left: -50px;
+  }
 `
 const CriarUnidade = styled.div`
   max-width: 450px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   .topo {
     display: flex;
     justify-content: space-between;
@@ -288,6 +352,41 @@ const CriarUnidade = styled.div`
     display: flex;
     .complemento, .bairro {
       width: 50%;
+    }
+  }
+`
+const FormEdicao = styled.div`
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  .campo-input {
+    background-color: white;
+    background-color: var(--cor-bg-escura);
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    width: 100%;
+    margin: 10px 0;
+    label {
+      color: orange;
+      border-radius: 10px 0 0 10px;
+      padding: 10px;
+      margin-right: 15px;
+      white-space: nowrap;
+    }
+    input {
+      background-color: #ccc;
+      width: 100%;
+      padding: 10px;
+      border-radius: 0 10px 10px 0;
+      border: none;
+      color: black;
+    }
+    input::placeholder {
+      color: #555;
     }
   }
 `
@@ -404,18 +503,22 @@ export default function MeuNegocio() {
         setUnidade({...unidade, [e.target.name]: e.target.value})
       }
 
+      // to={`/negocio/${nome_negocio}/${unidade.nome}`}
+
       const listUnidades = unidadeNegocio.map((unidade) => {
         return (
-        <Link key={unidade.id} to={`/negocio/${nome_negocio}/${unidade.nome}`} className='link'>
-          <div></div>
-          <div>
+        <div key={unidade.id} className='link'>
+          <div className='unidade-status'>
             <h1>{unidade.nome}</h1>
             <div className='status'>
               <p className={unidade.status === 'teste' ? 'teste' : unidade.status === 'ativo' ? 'ativo' : unidade.status === 'atrasado' ? 'atrasado' : unidade.status === 'inativo' ? 'inativo' : unidade.negocio === 'a_vencer' ? 'a-vencer' : '' }>{unidade.status}</p>
             </div>
           </div>
-          <img src={IconeSetaDireita}/>
-        </Link>
+          <div className='botoes'>
+            <button className='editar'>Editar</button>
+            <button className='acessar'>Acessar</button>
+          </div>
+        </div>
         )
       })
     
@@ -424,6 +527,9 @@ export default function MeuNegocio() {
       <App>
         {negocioUser.length > 0&&
         <div className='center'>
+
+          {/* Parte onde fica a logo do negócio */}
+
             <Capa>
               {telaEditarNegocio ? 
                 !imagem ? 
@@ -444,13 +550,51 @@ export default function MeuNegocio() {
               }
               <input type="file" id='inputImg' accept=".png, .jpg, .jpeg" onChange={e => setImagem(e.target.files[0])}/>
             </Capa>
+
+
+          {/* Tela onde edita o negócio. É aberto só quando o usuário clica no botão */}    
+
             {telaEditarNegocio ?
+
               <EditarNegocio>
-                <button onClick={voltarTela} className='seta'>
-                    <img src={IconeSetaEsquerda} />
-                </button>
+
+                <div className='topo'>
+                  <button onClick={voltarTela} className='seta'>
+                      <img src={IconeSetaEsquerda} />
+                  </button>
+
+                  <h2>Edite seu negócio</h2>
+
+                  <div></div>
+                </div>
+
+                <FormEdicao>
+
+                  <div className='campo-input'>
+                    <label>Nome:</label>
+                    <input placeholder={negocioUser[0].nome} />
+                  </div>
+
+                  <div className='campo-input'>
+                    <label>Categoria:</label>
+                    <input placeholder={negocioUser[0].categoria} />
+                  </div>
+
+                  <div className='campo-input'>
+                    <label>Nome da página:</label>
+                    <input placeholder={negocioUser[0].nome_da_pagina} />
+                  </div>
+
+                </FormEdicao>
+
+                <button className='botao-sucesso'>Salvar</button>
+                
               </EditarNegocio>
+
+
+
               : telaCriarUnidade ?
+              
               <CriarUnidade>
                 <div className='topo'>
                   <button onClick={voltarTela} className='seta'>
@@ -536,27 +680,45 @@ export default function MeuNegocio() {
                 </div>
               </CriarUnidade>
               :
+
+
               <BoxLista>
-              <div className='titulo-botao'>
-                <button onClick={() => setTelaEditarNegocio(true)} className='img-config'>
-                  <img src={IconeConfig}/>
-                </button>
-                <h2>Unidades</h2>
-                <button onClick={() => setTelaCriarUnidade(true)} className='botao-sucesso'>+</button>
-              </div>
-              {unidadeNegocio.length !== 0 ?
-                <ListUnidades>
-                  {listUnidades}
-                </ListUnidades> 
+
+                <div className='nome-negocio'>
+                  <h1>{negocioUser[0].nome}</h1>
+                  <button onClick={() => setTelaEditarNegocio(true)}>Editar Negócio</button>
+                </div>
+
+
+                {unidadeNegocio.length !== 0 ?
+
+                <div className='titulo-lista'>
+
+                  <div className='titulo-botao'>
+                    <h2>Unidades</h2>
+                    <button onClick={() => setTelaCriarUnidade(true)} className='botao-sucesso'>+ Criar unidade</button>
+                  </div>
+
+                
+
+                  <ListUnidades>
+                    {listUnidades}
+                  </ListUnidades> 
+
+                </div>
                 : 
-                <NaoUnidade>
-                  <p>Este negócio não possui unidades</p> 
-                  <button onClick={() => setTelaCriarUnidade(true)} className='botao-sucesso'>+ Nova Unidade</button>
-                </NaoUnidade>
-              }
-          </BoxLista> 
+
+                  <NaoUnidade>
+                    <p>Este negócio não possui unidades</p> 
+                    <button onClick={() => setTelaCriarUnidade(true)} className='botao-sucesso'>+ Criar Unidade</button>
+                  </NaoUnidade>
+                }
+
+              </BoxLista> 
+
             }
         </div>}
+
       </App>
     </ContainerMeuNegocio>
   );

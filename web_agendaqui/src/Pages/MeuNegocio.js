@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import App from '../layouts/App';
 import styled from 'styled-components';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
 import InputMask from "react-input-mask";
 import { addUnidade } from '../store/Unidades/Unidades.actions'
+import { getTodasUnidades } from '../store/Unidades/Unidades.fetch.actions'
+import { getNegocios } from '../store/Negocios/Negocios.fetch.actions'
 import { getUser } from '../store/Users/Users.fetch.actions';
 import store from '../store/store';
 import IconeSetaDireita from '../imagens/icones/seta-direita.png'
@@ -217,7 +219,7 @@ const ListUnidades = styled.div`
     }
     h1 {
       text-transform: uppercase;
-      font-size: 1.5em;
+      font-size: 1.2em;
     }
   }
 `
@@ -412,6 +414,19 @@ export default function MeuNegocio() {
       numero: '',
       complemento: ''
     })
+    const [editNegocio, setEditNegocio] = useState({
+      logo: '',
+      nome: '',
+      categoria: '',
+      nome_da_pagina: '',
+    })
+
+    let history = useHistory()
+
+      //retorna os dados do usuario logado da store
+      const user = useSelector((state) => {
+        return state.user
+      })
 
       //retorna todos os negocios do usuário que esta na store
       const negocios = useSelector((state) => {
@@ -448,40 +463,90 @@ export default function MeuNegocio() {
         })
       }
 
-      const salvarUnidade = () => {
+      const salvarUnidade = (nomeUnidade) => {
         if(erroCep) {
           setErro('Digite um cep válido')
         } else {
-          console.log(unidade)
-          const body = {
-            negocio_id: negocioUser[0].id,
-            nome: unidade.nome,
-            link_whatsapp: unidade.link_whatsapp,
-            contato: unidade.contato,
-            cep: endereco.cep,
-            rua: endereco.logradouro,
-            numero: unidade.numero,
-            complemento: unidade.complemento,
-            bairro: endereco.bairro,
-            cidade: endereco.localidade,
-            estado: endereco.uf,
-          }
-          console.log(body)
-          api.post('/api/v1/unidade', body, {
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${token}`
+          let salvar = true
+          for (let uni of unidadeNegocio) {
+            if (uni.nome  === nomeUnidade) {
+              salvar = false
             }
-          })
+          }
+
+          if (salvar) {
+            console.log(unidade)
+            const body = {
+              negocio_id: negocioUser[0].id,
+              nome: unidade.nome,
+              link_whatsapp: unidade.link_whatsapp,
+              contato: unidade.contato,
+              cep: endereco.cep,
+              rua: endereco.logradouro,
+              numero: unidade.numero,
+              complemento: unidade.complemento,
+              bairro: endereco.bairro,
+              cidade: endereco.localidade,
+              estado: endereco.uf,
+            }
+            console.log(body)
+            api.post('/api/v1/unidade', body, {
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            })
             .then((res) => {
               console.log(res.data)
               dispatch(addUnidade(res.data))
+              dispatch(getTodasUnidades())
+              setUnidade({nome: '', link_whatsapp: '', contato: '', cep: '', numero: '', complemento: ''})
+              setTelaCriarUnidade(false)
+              //history.push(`/negocio/${nome_negocio}`)
             }).catch((err) => {
               console.log(err.response.data.errors)
               setErros(err.response.data.errors)
               setErro('Preencha todos os campos obrigatórios')
             })
+          } else {
+            setErro('Esta unidade já existe')
           }
+        }
+          
+      }
+
+      const atualizarNegocio = () => {
+        let formData = new FormData();
+        formData.append('_method', 'patch')
+        if(editNegocio.nome) {
+          formData.append('nome', editNegocio.nome)
+        }
+        if(editNegocio.categoria) {
+          formData.append('categoria', editNegocio.categoria)
+        }
+        if(editNegocio.nome_da_pagina) {
+          formData.append('nome_da_pagina', editNegocio.nome_da_pagina)
+        }
+        if(editNegocio.logo) {
+            formData.append('logo', editNegocio.logo)
+        }
+        api.post(`/api/v1/negocio/${negocioUser[0].id}`, formData, {
+        headers: {
+            'Accept' : 'application/json',
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+        }
+        }).then((res) => {
+            console.log(res)
+            setEditNegocio({logo: '', nome: '', categoria: '', nome_da_pagina: ''})
+            dispatch(getNegocios(user.id, token))
+            //dispatch(putUser(res.data))
+            //setNome('')
+            //setAlterarNome('')
+        }).catch((err) => {
+            console.log(err.response.data)
+            //setErroNome(err.response.data.errors.nome)
+        })
       }
 
       const clicarImg = () => {
@@ -503,6 +568,11 @@ export default function MeuNegocio() {
         setUnidade({...unidade, [e.target.name]: e.target.value})
       }
 
+      const pegarAtualizacao = (e) => {
+        e.preventDefault();
+        setEditNegocio({...editNegocio, [e.target.name]: e.target.value})
+      }
+
       // to={`/negocio/${nome_negocio}/${unidade.nome}`}
 
       const listUnidades = unidadeNegocio.map((unidade) => {
@@ -516,7 +586,7 @@ export default function MeuNegocio() {
           </div>
           <div className='botoes'>
             <button className='editar'>Editar</button>
-            <button className='acessar'>Acessar</button>
+            <button className='acessar' onClick={() => history.push(`/negocio/${nome_negocio}/${unidade.nome}`)}>Acessar</button>
           </div>
         </div>
         )
@@ -532,23 +602,22 @@ export default function MeuNegocio() {
 
             <Capa>
               {telaEditarNegocio ? 
-                !imagem ? 
+                !editNegocio.logo ? 
                 <div>
                   <img src={`${urlBase}/storage/${negocioUser[0].logo}`}/> 
                   <button onClick={clicarImg} className='alterar-logo'>Alterar Logo</button>
                 </div>
                 : 
                 <div>
-                  <img src={URL.createObjectURL(imagem)}/> 
+                  <img src={URL.createObjectURL(editNegocio.logo)}/> 
                   <div className='alterar-logo'>
-                    <button onClick={() => setImagem('')}>Cancelar</button>
-                    <button>Salvar</button>
+                    <button onClick={() => setEditNegocio({logo: ''})}>Cancelar</button>
                   </div>
                 </div>
                 :
                 <img src={`${urlBase}/storage/${negocioUser[0].logo}`}/>
               }
-              <input type="file" id='inputImg' accept=".png, .jpg, .jpeg" onChange={e => setImagem(e.target.files[0])}/>
+              <input type="file" id='inputImg' accept=".png, .jpg, .jpeg" onChange={e => setEditNegocio({logo: e.target.files[0]})}/>
             </Capa>
 
 
@@ -572,22 +641,22 @@ export default function MeuNegocio() {
 
                   <div className='campo-input'>
                     <label>Nome:</label>
-                    <input placeholder={negocioUser[0].nome} />
+                    <input name='nome' placeholder={negocioUser[0].nome} value={editNegocio.nome} onChange={pegarAtualizacao}/>
                   </div>
 
                   <div className='campo-input'>
                     <label>Categoria:</label>
-                    <input placeholder={negocioUser[0].categoria} />
+                    <input name='categoria' placeholder={negocioUser[0].categoria} value={editNegocio.categoria} onChange={pegarAtualizacao}/>
                   </div>
 
                   <div className='campo-input'>
                     <label>Nome da página:</label>
-                    <input placeholder={negocioUser[0].nome_da_pagina} />
+                    <input name='nome_da_pagina' placeholder={negocioUser[0].nome_da_pagina} value={editNegocio.nome_da_pagina} onChange={pegarAtualizacao}/>
                   </div>
 
                 </FormEdicao>
 
-                <button className='botao-sucesso'>Salvar</button>
+                <button className='botao-sucesso' onClick={atualizarNegocio}>Atualizar</button>
                 
               </EditarNegocio>
 
@@ -676,7 +745,7 @@ export default function MeuNegocio() {
                 <p className='erro-final'>{erro}</p>
 
                 <div className='botao-salvar'>
-                  <button className='botao-sucesso' onClick={salvarUnidade}>Salvar</button>
+                  <button className='botao-sucesso' onClick={() => salvarUnidade(unidade.nome)}>Salvar</button>
                 </div>
               </CriarUnidade>
               :

@@ -11,7 +11,6 @@ import { getUser } from '../store/Users/Users.fetch.actions';
 import store from '../store/store';
 import IconeSetaDireita from '../imagens/icones/seta-direita.png'
 import IconeSetaEsquerda from '../imagens/icones/seta-esquerda.png'
-import IconeConfig from '../imagens/icones/config.png'
 import api from '../services/api';
 
 const ContainerMeuNegocio = styled.div`
@@ -20,11 +19,23 @@ const ContainerMeuNegocio = styled.div`
     color: white;
     padding-bottom: 20px;
     .center {
+      position: relative;
       display: flex;
       flex-direction: column;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
+    }
+    a.seta {
+      position: absolute;
+      top: 15px;
+      left: 10px;
+      z-index: 100;
+      img {
+        width: 30px;
+        height: 30px;
+        object-fit: cover;
+      }
     }
     button.seta {
       width: 40px;
@@ -38,7 +49,7 @@ const ContainerMeuNegocio = styled.div`
         object-fit: cover;
       }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       margin-top: calc(var(--altura-header) - 10px);
       min-height: calc(100vh - var(--altura-header));
       padding-bottom: var(--altura-header);
@@ -103,10 +114,12 @@ const BoxLista = styled.div`
     .nome-negocio {
       margin-bottom: 10px;
       text-align: center;
-      button {
+      a {
         font-size:0.8em;
         background-color: orange;
         cursor: pointer;
+        text-decoration: none;
+        color: black;
         border: none;
         padding: 5px;
         border-radius: 3px;
@@ -154,7 +167,7 @@ const BoxLista = styled.div`
         object-fit: cover;
       }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       width: 100%;
       border: none;
       border-radius: 70px 70px 0 0;
@@ -228,23 +241,6 @@ const NaoUnidade = styled.div`
   text-align: center;
   button {
     margin: 15px 0;
-  }
-`
-
-const EditarNegocio = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 450px;
-  width: 100%;
-  .topo {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  h2 {
-    margin-left: -50px;
   }
 `
 const CriarUnidade = styled.div`
@@ -357,41 +353,6 @@ const CriarUnidade = styled.div`
     }
   }
 `
-const FormEdicao = styled.div`
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  max-width: 400px;
-  width: 100%;
-  margin: 0 auto;
-  .campo-input {
-    background-color: white;
-    background-color: var(--cor-bg-escura);
-    display: flex;
-    align-items: center;
-    border-radius: 10px;
-    width: 100%;
-    margin: 10px 0;
-    label {
-      color: orange;
-      border-radius: 10px 0 0 10px;
-      padding: 10px;
-      margin-right: 15px;
-      white-space: nowrap;
-    }
-    input {
-      background-color: #ccc;
-      width: 100%;
-      padding: 10px;
-      border-radius: 0 10px 10px 0;
-      border: none;
-      color: black;
-    }
-    input::placeholder {
-      color: #555;
-    }
-  }
-`
 
 export default function MeuNegocio() {
     const dispatch = useDispatch()
@@ -401,7 +362,6 @@ export default function MeuNegocio() {
     const [telaEditarNegocio, setTelaEditarNegocio] = useState(false)
     const [telaCriarUnidade, setTelaCriarUnidade] = useState(false)
     const [imagem, setImagem] = useState('')
-    const [nome, setNome] = useState('')
     const [endereco, setEndereco] = useState({})
     const [erroCep, setErroCep] = useState('')
     const [erro, setErro] = useState('')
@@ -414,12 +374,6 @@ export default function MeuNegocio() {
       numero: '',
       complemento: ''
     })
-    const [editNegocio, setEditNegocio] = useState({
-      logo: '',
-      nome: '',
-      categoria: '',
-      nome_da_pagina: '',
-    })
 
     let history = useHistory()
 
@@ -428,13 +382,13 @@ export default function MeuNegocio() {
         return state.user
       })
 
-      //retorna todos os negocios do usuário que esta na store
+      //retorna todos os negocios do usuário logado que esta na store
       const negocios = useSelector((state) => {
         return state.negocios
       })
 
       //retorna somente o negocio da página atual
-      const negocioUser = negocios.filter((negocio) => {
+      let negocioUser = negocios.filter((negocio) => {
         return negocio.nome_da_pagina === nome_negocio
       })
 
@@ -502,7 +456,6 @@ export default function MeuNegocio() {
               dispatch(getTodasUnidades())
               setUnidade({nome: '', link_whatsapp: '', contato: '', cep: '', numero: '', complemento: ''})
               setTelaCriarUnidade(false)
-              //history.push(`/negocio/${nome_negocio}`)
             }).catch((err) => {
               console.log(err.response.data.errors)
               setErros(err.response.data.errors)
@@ -513,45 +466,6 @@ export default function MeuNegocio() {
           }
         }
           
-      }
-
-      const atualizarNegocio = () => {
-        let formData = new FormData();
-        formData.append('_method', 'patch')
-        if(editNegocio.nome) {
-          formData.append('nome', editNegocio.nome)
-        }
-        if(editNegocio.categoria) {
-          formData.append('categoria', editNegocio.categoria)
-        }
-        if(editNegocio.nome_da_pagina) {
-          formData.append('nome_da_pagina', editNegocio.nome_da_pagina)
-        }
-        if(editNegocio.logo) {
-            formData.append('logo', editNegocio.logo)
-        }
-        api.post(`/api/v1/negocio/${negocioUser[0].id}`, formData, {
-        headers: {
-            'Accept' : 'application/json',
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`
-        }
-        }).then((res) => {
-            console.log(res)
-            setEditNegocio({logo: '', nome: '', categoria: '', nome_da_pagina: ''})
-            dispatch(getNegocios(user.id, token))
-            //dispatch(putUser(res.data))
-            //setNome('')
-            //setAlterarNome('')
-        }).catch((err) => {
-            console.log(err.response.data)
-            //setErroNome(err.response.data.errors.nome)
-        })
-      }
-
-      const clicarImg = () => {
-        let file = document.getElementById('inputImg')
-        file.click();
       }
 
       const voltarTela = () => {
@@ -566,11 +480,6 @@ export default function MeuNegocio() {
         setErro('')
         setErros({...erros, [e.target.name]: ''})
         setUnidade({...unidade, [e.target.name]: e.target.value})
-      }
-
-      const pegarAtualizacao = (e) => {
-        e.preventDefault();
-        setEditNegocio({...editNegocio, [e.target.name]: e.target.value})
       }
 
       // to={`/negocio/${nome_negocio}/${unidade.nome}`}
@@ -597,27 +506,12 @@ export default function MeuNegocio() {
       <App>
         {negocioUser.length > 0&&
         <div className='center'>
-
-          {/* Parte onde fica a logo do negócio */}
+            <Link to={`/negocios`} className='seta'>
+              <img src={IconeSetaEsquerda} />
+            </Link>
 
             <Capa>
-              {telaEditarNegocio ? 
-                !editNegocio.logo ? 
-                <div>
-                  <img src={`${urlBase}/storage/${negocioUser[0].logo}`}/> 
-                  <button onClick={clicarImg} className='alterar-logo'>Alterar Logo</button>
-                </div>
-                : 
-                <div>
-                  <img src={URL.createObjectURL(editNegocio.logo)}/> 
-                  <div className='alterar-logo'>
-                    <button onClick={() => setEditNegocio({logo: ''})}>Cancelar</button>
-                  </div>
-                </div>
-                :
-                <img src={`${urlBase}/storage/${negocioUser[0].logo}`}/>
-              }
-              <input type="file" id='inputImg' accept=".png, .jpg, .jpeg" onChange={e => setEditNegocio({logo: e.target.files[0]})}/>
+              <img src={`${urlBase}/storage/${negocioUser[0].logo}`}/>
             </Capa>
 
 
@@ -625,41 +519,7 @@ export default function MeuNegocio() {
 
             {telaEditarNegocio ?
 
-              <EditarNegocio>
-
-                <div className='topo'>
-                  <button onClick={voltarTela} className='seta'>
-                      <img src={IconeSetaEsquerda} />
-                  </button>
-
-                  <h2>Edite seu negócio</h2>
-
-                  <div></div>
-                </div>
-
-                <FormEdicao>
-
-                  <div className='campo-input'>
-                    <label>Nome:</label>
-                    <input name='nome' placeholder={negocioUser[0].nome} value={editNegocio.nome} onChange={pegarAtualizacao}/>
-                  </div>
-
-                  <div className='campo-input'>
-                    <label>Categoria:</label>
-                    <input name='categoria' placeholder={negocioUser[0].categoria} value={editNegocio.categoria} onChange={pegarAtualizacao}/>
-                  </div>
-
-                  <div className='campo-input'>
-                    <label>Nome da página:</label>
-                    <input name='nome_da_pagina' placeholder={negocioUser[0].nome_da_pagina} value={editNegocio.nome_da_pagina} onChange={pegarAtualizacao}/>
-                  </div>
-
-                </FormEdicao>
-
-                <button className='botao-sucesso' onClick={atualizarNegocio}>Atualizar</button>
-                
-              </EditarNegocio>
-
+              ''
 
 
               : telaCriarUnidade ?
@@ -755,7 +615,7 @@ export default function MeuNegocio() {
 
                 <div className='nome-negocio'>
                   <h1>{negocioUser[0].nome}</h1>
-                  <button onClick={() => setTelaEditarNegocio(true)}>Editar Negócio</button>
+                  <Link to={`/negocio/editar/${nome_negocio}`}>Editar Negócio</Link>
                 </div>
 
 

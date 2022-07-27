@@ -128,7 +128,7 @@ const ContainerPerfil = styled.div`
         color: red;
         margin-top: -10px;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       margin-top: calc(var(--altura-header) - 10px);
       min-height: calc(100vh - var(--altura-header));
     }

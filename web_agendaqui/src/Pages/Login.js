@@ -65,6 +65,7 @@ export default function Login(props) {
     const [loading, setLoading] = useState(false)
 
     const Entrar = () => {
+      setLoading(true)
         const body = {
           email: email,
           password: senha
@@ -83,6 +84,8 @@ export default function Login(props) {
         }).catch((err) => {
           console.log('Fiz uma requisição de login e deu errado')
           setErro(err.response.data.erro)
+        }).finally(() => {
+          setLoading(false)
         })
       
     }

@@ -16,7 +16,7 @@ const ContainerUnidade = styled.div`
       align-items: center;
       justify-content: start;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       margin-top: calc(var(--altura-header) - 10px);
       min-height: calc(100vh - var(--altura-header));
     }

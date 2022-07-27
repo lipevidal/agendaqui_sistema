@@ -19,6 +19,7 @@ import Loading from './Loading';
 import Negocios from '../Pages/Negocios';
 import MeuNegocio from '../Pages/MeuNegocio';
 import Unidades from '../Pages/Unidade';
+import EditarNegocio from '../Pages/EditarNegocio';
 
 export default function Routes() {
   const dispatch = useDispatch()
@@ -53,6 +54,7 @@ export default function Routes() {
             <PrivateRoute exact path="/novo-negocio" component={NovoNegocio} />
             <PrivateRoute exact path="/negocios" component={Negocios} />
             <PrivateRoute exact path="/negocio/:nome_negocio" component={MeuNegocio} />
+            <PrivateRoute exact path="/negocio/editar/:nome_negocio" component={EditarNegocio} />
             <PrivateRoute exact path="/negocio/:nome_negocio/:unidade" component={Unidades} />
             <Route exact path="/erro" component={Erro} />
         </Switch>

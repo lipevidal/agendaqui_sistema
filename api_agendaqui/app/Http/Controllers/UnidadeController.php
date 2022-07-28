@@ -40,8 +40,23 @@ class UnidadeController extends Controller
      */
     public function store(Request $request)
     {
+        $data = date('Y/m/d');
         $request->validate($this->unidade->rules(), $this->unidade->feedback());
-        $unidade = $this->unidade->create($request->all());
+        $unidade = $this->unidade->create([
+            'negocio_id' => $request->negocio_id,
+            'nome' => $request->nome,
+            'link_whatsapp' => $request->link_whatsapp,
+            'contato' => $request->contato,
+            'cep' => $request->cep,
+            'rua'=> $request->rua,
+            'numero'=> $request->numero,
+            'complemento'=> $request->complemento,
+            'bairro'=> $request->bairro,
+            'cidade'=> $request->cidade,
+            'estado'=> $request->estado,
+            'status'=> 'teste',
+            'vencimento'=> date('Y/m/d', strtotime("+7 days",strtotime($data))),
+        ]);
 
         return $unidade;
     }

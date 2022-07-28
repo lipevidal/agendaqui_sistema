@@ -3,6 +3,7 @@ import api from "../services/api";
 import App from '../layouts/App';
 import styled from 'styled-components';
 import ImagemPadrao from '../imagens/perfilneutra.jpg'
+import IconeSetaEsquerda from '../imagens/icones/seta-esquerda.png'
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux'
 import { addNegocios, addNegocio } from "../store/Negocios/Negocios.actions";
@@ -11,17 +12,31 @@ import { postNegocios } from '../store/Negocios/Negocios.fetch.actions';
 
 const ContainerNovoNegocio = styled.div`
     background-color: #2d3d54;
-    min-height: calc(100vh - var(--altura-header));
-    margin-top: var(--altura-header);
-    padding-bottom: var(--altura-header);
+    min-height: 100vh;
+    padding-top: 10px;
+    padding-bottom: 20px;
     display: flex;
     flex-direction: column;
+    .voltar-titulo {
+        width: 100%;
+        padding: 0 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        img, .vazio {
+            width: 30px;
+            height: 30px;
+        }
+    }
     .form {
         text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        .nome-pagina {
+            text-transform: lowercase;
+        }
         h2 {
             color: white;
             margin: 10px;
@@ -68,7 +83,6 @@ const ContainerNovoNegocio = styled.div`
           font-size: 0.8em;
           text-align: center;
           color: red;
-          height: 15px;
         }
         button {
             background-color: #369a5d;
@@ -83,12 +97,18 @@ const ContainerNovoNegocio = styled.div`
             }
         }
     }
+    @media (max-width: 650px) {
+      margin-top: calc(var(--altura-header) - 10px);
+      min-height: calc(100vh - var(--altura-header));
+      padding-bottom: var(--altura-header);
+    }
 
 `
 
 export default function NovoNegocio(props) {
     const dispatch = useDispatch()
     const token = localStorage.getItem('token-agendaqui')
+    const [erro, setErro] = useState('')
     const [nomeNegocio, setNomeNegocio] = useState('')
     const [erroNomeNegocio, setErroNomeNegocio] = useState('')
     const [categoria, setCategoria] = useState('')
@@ -101,25 +121,40 @@ export default function NovoNegocio(props) {
     const [imagemPadrao, setImagemPadrao] = useState(ImagemPadrao)
     const [user, setUser] = useState({})
 
+    //retorna somente o id do usuário logado que esta na store
     const userId = useSelector((state) => {
         return state.user.id
-      })
+    })
+
+    //retorna todos os negocios do usuário logado que esta na store
+    const negocios = useSelector((state) => {
+    return state.negocios
+    })
 
     const criarNegocio = () => {
-        buscarDados()
-        let formData = new FormData();
-        formData.append('user_id', userId)
-        formData.append('nome', nomeNegocio)
-        formData.append('categoria', categoria)
-        formData.append('nome_da_pagina', nomePagina)
-        formData.append('logo', logo)
-        
-        api.post('/api/v1/negocio', formData, {
-            headers: {
-                'Accept' : 'application/json',
-                'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${token}`
+        setErro('')
+        let salvar = true
+        for (let neg of negocios) {
+            if (neg.nome.toLocaleLowerCase()  === nomeNegocio.toLocaleLowerCase()) {
+                salvar = false
             }
+        }
+
+        if (salvar) {
+            buscarDados()
+            let formData = new FormData();
+            formData.append('user_id', userId)
+            formData.append('nome', nomeNegocio.toLowerCase())
+            formData.append('categoria', categoria.toLowerCase())
+            formData.append('nome_da_pagina', nomePagina.toLowerCase())
+            formData.append('logo', logo)
+
+            api.post('/api/v1/negocio', formData, {
+                headers: {
+                    'Accept' : 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
+                }
             }).then((res) => {
                 console.log(res.data)
                 dispatch(addNegocio(res.data))
@@ -131,6 +166,11 @@ export default function NovoNegocio(props) {
                 setErroNomePagina(err.response.data.errors.nome_da_pagina)
                 setErroLogo(err.response.data.errors.logo)
             })
+
+        } else {
+            setErro('Este negocio já existe')
+        }
+        
     }
 
     const buscarDados = () => {
@@ -179,7 +219,13 @@ export default function NovoNegocio(props) {
         <App>
             <div className='center'>
                 <div className='form'>
-                    <h2>NOVO NEGÓCIO</h2>
+                    <div className='voltar-titulo'>
+                        <Link to={`/negocios`} className='seta'>
+                            <img src={IconeSetaEsquerda} />
+                        </Link>
+                        <h2>NOVO NEGÓCIO</h2>
+                        <div className='vazio'></div>
+                    </div>
                     <div className='box-imagem'>
                         { logo ? logoDB === logo ? 
                             <img src={logo} alt="ImagemAb" onClick={clicarImg}/> 
@@ -206,10 +252,17 @@ export default function NovoNegocio(props) {
                         <p className='erro-texto'>{erroCategoria}</p>
 
                         <div className="label-float">
-                            <input value={nomePagina.trim()} onChange={pegarNomePagina} placeholder=" " autoComplete='none' required/>
+                            <input value={nomePagina.trim()} onChange={pegarNomePagina} placeholder=" " autoComplete='none' className='nome-pagina' required/>
                             <label>Nome da página</label>
                         </div>
                         <p className='erro-texto'>{erroNomePagina}</p>
+
+                        <div className="label-float">
+                            <input placeholder=" " autoComplete='none' required/>
+                            <label>Cupom de desconto</label>
+                        </div>
+                        <p className='erro-texto'>{erroNomePagina}</p>
+                        <p className='erro-texto'>{erro}</p>
                     
                     </div>
                     <button onClick={criarNegocio}>Enviar</button>

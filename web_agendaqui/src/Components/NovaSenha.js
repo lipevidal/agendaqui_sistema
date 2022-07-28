@@ -9,7 +9,7 @@ const BoxNovaSenha = styled.div`
         text-align: center;
     }
     p.codigo-incorreto {
-      margin-top: 2px;
+      margin-top: -10px;
       margin-left: 5px;
       margin-bottom: 18px;
       font-size: 0.8em;
@@ -39,7 +39,7 @@ export default function NovaSenha(props) {
         <input type="password" value={props.valorSenha} onChange={props.onchangePegarSenha} placeholder='Senha' autoComplete='none'/>
         <input type="password" value={props.valorRepitaSenha} onChange={props.onchangePegarSenhaRepetida} placeholder='Repita sua senha' autoComplete='none'/>
         <p className="codigo-incorreto">{props.mensagemErro}</p>
-        <button onClick={props.atualizarSenha}>Enviar</button>
+        <button className='botao-sucesso' onClick={props.atualizarSenha}>Enviar</button>
     </BoxNovaSenha> 
   );
 }

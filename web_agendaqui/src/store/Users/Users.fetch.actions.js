@@ -1,5 +1,5 @@
 import api from "../../services/api";
-import { addUser, novaSenha, putTelefone, putUser } from "./Users.actions";
+import { addUser, newSenha, putTelefone, putUser } from "./Users.actions";
 import { getNegocios } from "../Negocios/Negocios.fetch.actions";
 
 const token = localStorage.getItem('token-agendaqui')
@@ -55,7 +55,6 @@ export const deleteFoto = (id, user) => {
             }).then((res) => {
                 console.log(res)
                 dispatch(putUser(res.data))
-                document.location.reload(true);
             }).catch((err) => {
                 console.log(err.response)
             })
@@ -85,7 +84,7 @@ export const newPassword = (id, user) => {
             }
           }).then((res) => {
             console.log(res.data)
-            dispatch(novaSenha(res.data))
+            dispatch(newSenha(res.data))
           }).catch((err) => {
             console.log(err.response.data.errors)
           })

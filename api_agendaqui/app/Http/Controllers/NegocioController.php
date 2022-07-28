@@ -50,7 +50,9 @@ class NegocioController extends Controller
             'nome' => $request->nome,
             'logo' => $imagem_urn,
             'categoria' => $request->categoria,
-            'nome_da_pagina' => $request->nome_da_pagina
+            'nome_da_pagina' => $request->nome_da_pagina,
+            'codigo_afiliado'=> rand(11111111, 99999999),
+            'dias_inativos' => 0
         ]);
 
         return $negocio;

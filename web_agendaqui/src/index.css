@@ -145,7 +145,7 @@ code {
 /*--------Button-----------*/
 .botao-sucesso {
   background-color: var(--cor-sucesso);
-  padding: 10px 20px;
+  padding: 8px 20px;
   border-radius: 10px;
   border: none; 
   color: var(--cor-texto-branca);
@@ -167,5 +167,28 @@ code {
 }
 .botao-padrao:hover {
   background-color: var(--cor-padrao-hover);
+}
+/************------------------****************/
+/*****Status*****************/
+.teste, .ativo, .atrasado, .inativo, .a-vencer {
+  padding: 5px 10px;
+  border-radius: 10px;
+  text-transform: capitalize;
+}
+.teste {
+  background-color: #ccc;
+  color: black;
+}
+.ativo {
+  background-color: #369a5d;
+}
+.atrasado {
+  background-color: #ffa83f;
+}
+.inativo {
+  background-color: #df484a;
+}
+.a-vencer {
+  background-color: #ff895f
 }
 /************------------------****************/

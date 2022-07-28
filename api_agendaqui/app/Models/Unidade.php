@@ -26,6 +26,8 @@ class Unidade extends Model
         'bairro',
         'cidade',
         'estado',
+        'status',
+        'vencimento',
     ];
 
     public function rules() {

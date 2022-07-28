@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, Suspense} from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
 import PrivateRoute from './PrivateRoute'
 import Agendamentos from '../Pages/Agendamentos';
@@ -10,18 +10,20 @@ import Login from '../Pages/Login';
 import Perfil from '../Pages/Perfil';
 import RecuperarSenha from '../Pages/RecuperarSenha';
 import NovoNegocio from '../Pages/NovoNegocio';
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
+import { getTodasUnidades } from '../store/Unidades/Unidades.fetch.actions';
 import store from '../store/store'
 import { DetalhesUser } from '../context/UserContext';
 import Loading from './Loading';
 import Negocios from '../Pages/Negocios';
 import MeuNegocio from '../Pages/MeuNegocio';
+import Unidades from '../Pages/Unidade';
+import EditarNegocio from '../Pages/EditarNegocio';
 
 export default function Routes() {
   const dispatch = useDispatch()
   const token = localStorage.getItem('token-agendaqui')
-  const user = store.replaceReducer.user
   const [loading, setLoading] = useState(false)
   
   useEffect(() => {
@@ -30,12 +32,16 @@ export default function Routes() {
       dispatch(getUser(token))
     } else {
       console.log('Token não existe, não faço requisição')
+      dispatch(getTodasUnidades())
     }
   }, [])
 
+  const user = useSelector((state) => {
+    return state.user
+  })
+
   return (
     <BrowserRouter>
-        {loading ? <Loading /> : ''}
         <Switch>
             <Route exact path="/cadastro" component={Cadastro} />
             <Route exact path="/login" component={Login} />
@@ -48,6 +54,8 @@ export default function Routes() {
             <PrivateRoute exact path="/novo-negocio" component={NovoNegocio} />
             <PrivateRoute exact path="/negocios" component={Negocios} />
             <PrivateRoute exact path="/negocio/:nome_negocio" component={MeuNegocio} />
+            <PrivateRoute exact path="/negocio/editar/:nome_negocio" component={EditarNegocio} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/:unidade" component={Unidades} />
             <Route exact path="/erro" component={Erro} />
         </Switch>
     </BrowserRouter>

@@ -40,6 +40,23 @@ export const getUnidades = (dadosNegocio, token) => {
     }
 }
 
+export const getTodasUnidades = () => {
+    return (dispatch) => {
+        api.get(`/api/unidade`, {
+        headers: {
+            'Accept' : 'application/json',
+            'Content-Type': 'application/json',
+        }
+        }).then((res) => {
+            console.log('Dados da requisição getUnidades res.data')
+            console.log(res.data)
+            dispatch(addTodasUnidades(res.data))
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
+}
+
 //dispatch(addNegocios(res.data))
 
 // export const postNegocios = (dados) => {

@@ -55,6 +55,7 @@ class UnidadeController extends Controller
             'cidade'=> $request->cidade,
             'estado'=> $request->estado,
             'status'=> 'teste',
+            'atualizar' => date('Y/m/d', strtotime("+7 days",strtotime($data))),
             'vencimento'=> date('Y/m/d', strtotime("+7 days",strtotime($data))),
         ]);
 
@@ -81,7 +82,10 @@ class UnidadeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $unidade = $this->unidade->find($id);
+        if($unidade === null) {
+            return response()->json(['erro' => 'O usuário não existe'], 400);
+        }
     }
 
     /**

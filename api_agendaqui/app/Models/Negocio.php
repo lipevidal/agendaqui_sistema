@@ -21,7 +21,8 @@ class Negocio extends Model
         'categoria',
         'nome_da_pagina',
         'codigo_afiliado',
-        'dias_inativos',
+        'entrou',
+        'excluir'
     ];
 
     public function rules() {

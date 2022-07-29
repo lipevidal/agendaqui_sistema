@@ -27,6 +27,7 @@ class CreateUnidadesTable extends Migration
             $table->string('cidade');
             $table->string('estado');
             $table->string('status');
+            $table->date('atualizar');
             $table->date('vencimento');
             $table->timestamps();
         });

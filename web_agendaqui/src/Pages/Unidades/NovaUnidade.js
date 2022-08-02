@@ -208,10 +208,6 @@ export default function NovaUnidade() {
         return unidade.negocio_id === negocioUser[0].id
     })
 
-    const unidadeNegocio = unidadesNegocio.filter((unidad) => {
-        return unidad.nome === unidade
-    })
-
     console.log(unidadesNegocio)
 
 //    const list = negocioUser.map((unidade, index) => {

@@ -245,137 +245,12 @@ const NaoUnidade = styled.div`
     margin: 15px 0;
   }
 `
-const CriarUnidade = styled.div`
-  max-width: 450px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  .topo {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 10px;
-    h2 {
-      margin-left: -30px;
-    }
-    button {
-      cursor: pointer;
-    }
-  }
-  .form {
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items:center;
-    max-width: 400px;
-    width: 100%;
-  }
-  .erro {
-    color: red;
-    font-size: 0.8em;
-    margin: -10px 0 0 15px;
-  }
-  .erro-final{
-    color: red;
-    text-align: center;
-    font-size: 0.8em;
-    margin: 20px;
-  }
-  .contorno-erro {
-    border: 1px solid red;
-  }
-  h5 {
-    border-bottom: 1px solid red;
-    font-size: 1em;
-    margin: 15px;
-  }
-  .botao-salvar {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  .campo-input {
-    display: flex;
-    width: 100%;
-    background-color: var(--cor-bg-escura);
-    padding: 10px;
-    margin: 10px;
-    border-radius: 10px;
-    position: relative;
-    label {
-      position: absolute;
-      top: 8px;
-      left: 10px;
-      color: #ccc;
-    }
-    input {
-      width: 100%;
-      margin-top: 25px;
-      background-color: transparent;
-      border: none;
-      color: #ececf6;
-      margin-left: 8px;
-    }
-    input.nome {
-      text-transform: capitalize;
-    }
-    input.link-whatsapp{
-      text-transform: lowercase;
-    }
-  }
-  .gerar-link {
-    margin-left: 20px;
-    margin-top: -10px;
-    margin-bottom: 10px;
-    width: 100%;
-    a {
-      color: #ccc;
-    }
-  }
-  .cep {
-    width: 100%;
-    .campo-input {
-      width: 40%;
-    }
-  }
-  .rua-numero, .cidade-estado {
-    display: flex;
-    .rua, .cidade {
-      width: 70%;
-    }
-    .numero, .estado {
-      width: 30%;
-    }
-  }
-  .complemento-bairro {
-    display: flex;
-    .complemento, .bairro {
-      width: 50%;
-    }
-  }
-`
 
 export default function MeuNegocio() {
     const dispatch = useDispatch()
     const token = localStorage.getItem('token-agendaqui')
     const { nome_negocio } = useParams()
     const [urlBase, setUrlBase] = useState('http://localhost:8000')
-    const [telaEditarNegocio, setTelaEditarNegocio] = useState(false)
-    const [telaCriarUnidade, setTelaCriarUnidade] = useState(false)
-    const [imagem, setImagem] = useState('')
-    const [endereco, setEndereco] = useState({})
-    const [erroCep, setErroCep] = useState('')
-    const [erro, setErro] = useState('')
-    const [erros, setErros] = useState({})
-    const [unidade, setUnidade] = useState({
-      nome: '',
-      link_whatsapp: '',
-      contato: '',
-      cep: '',
-      numero: '',
-      complemento: ''
-    })
 
     let history = useHistory()
 
@@ -403,87 +278,7 @@ export default function MeuNegocio() {
       const unidadeNegocio = unidades.filter((unidade) => {
         return unidade.negocio_id === negocioUser[0].id
       })
-
-      const buscarCep = () => {
-        api.get(`https://viacep.com.br/ws/${unidade.cep}/json/`)
-        .then((res) => {
-          console.log(res.data)
-          if(res.data.erro) {
-            setErroCep('Cep inválido')
-          } else {
-            setEndereco(res.data)
-          }
-        }).catch((err) => {
-          console.log(err)
-          setErroCep('Cep inválido')
-        })
-      }
-
-      const salvarUnidade = (nomeUnidade) => {
-        if(erroCep) {
-          setErro('Digite um cep válido')
-        } else {
-          let salvar = true
-          for (let uni of unidadeNegocio) {
-            if (uni.nome  === nomeUnidade) {
-              salvar = false
-            }
-          }
-
-          if (salvar) {
-            console.log(unidade)
-            const body = {
-              negocio_id: negocioUser[0].id,
-              nome: unidade.nome,
-              link_whatsapp: unidade.link_whatsapp,
-              contato: unidade.contato,
-              cep: endereco.cep,
-              rua: endereco.logradouro,
-              numero: unidade.numero,
-              complemento: unidade.complemento,
-              bairro: endereco.bairro,
-              cidade: endereco.localidade,
-              estado: endereco.uf,
-            }
-            console.log(body)
-            api.post('/api/v1/unidade', body, {
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
-              }
-            })
-            .then((res) => {
-              console.log(res.data)
-              dispatch(addUnidade(res.data))
-              dispatch(getTodasUnidades())
-              setUnidade({nome: '', link_whatsapp: '', contato: '', cep: '', numero: '', complemento: ''})
-              setTelaCriarUnidade(false)
-            }).catch((err) => {
-              console.log(err.response.data.errors)
-              setErros(err.response.data.errors)
-              setErro('Preencha todos os campos obrigatórios')
-            })
-          } else {
-            setErro('Esta unidade já existe')
-          }
-        }
-          
-      }
-    
-
-      const voltarTela = () => {
-        setTelaEditarNegocio(false)
-        setTelaCriarUnidade(false)
-        setImagem('')
-      }
-
-      const pegarDados = (e) => {
-        e.preventDefault();
-        setErroCep('')
-        setErro('')
-        setErros({...erros, [e.target.name]: ''})
-        setUnidade({...unidade, [e.target.name]: e.target.value})
-      }
+  
 
       // to={`/negocio/${nome_negocio}/${unidade.nome}`}
 
@@ -516,137 +311,42 @@ export default function MeuNegocio() {
             <Capa>
               <img src={`${urlBase}/storage/${negocioUser[0].logo}`}/>
             </Capa>
-  
 
-            {telaEditarNegocio ?
+            <BoxLista>
 
-              ''
+              <div className='nome-negocio'>
+                <h1>{negocioUser[0].nome}</h1>
+                <Link to={`/negocio/editar/${nome_negocio}`}>Editar Negócio</Link>
+              </div>
 
 
-              : telaCriarUnidade ?
+              {unidadeNegocio.length !== 0 ?
+
+              <div className='titulo-lista'>
+
+                <div className='titulo-botao'>
+                  <h2>Unidades</h2>
+                  <button onClick={() => history.push(`/negocio/${nome_negocio}/nova-unidade`)} className='botao-sucesso'>+ Criar unidade</button>
+                </div>
+
               
-              <CriarUnidade>
-                <div className='topo'>
-                  <button onClick={voltarTela} className='seta'>
-                    <img src={IconeSetaEsquerda} />
-                  </button>
-                  <h2>Nova Unidade</h2>
-                  <div></div>
-                </div>
 
-                <div className='form'>
-                  <div className={erros.nome ? 'campo-input contorno-erro': 'campo-input'}>
-                    <label>Nome*:</label>
-                    <input placeholder='Nome da unidade' value={unidade.nome} name='nome' onChange={pegarDados} autoComplete="none" className='nome'/>
-                  </div>
+                <ListUnidades>
+                  {listUnidades}
+                </ListUnidades> 
 
-                  <div className='campo-input'>
-                    <label>Link do WhatsApp:</label>
-                    <input placeholder='https://linkdowhatsapp.com' value={unidade.link_whatsapp.trim()} name='link_whatsapp' onChange={pegarDados} autoComplete="none" className='link-whatsapp'/>
-                  </div>
+              </div>
+              : 
 
-                  <div className='gerar-link'>
-                    <a href='https://a.umbler.com/gerador-de-link-whatsapp?gclid=Cj0KCQjwidSWBhDdARIsAIoTVb2KCAz7D_STsAvDcrh97KDPtJkDrChsPuZk9EZWa7sCHIAfmZl7L-UaAt9gEALw_wcB' target='_blank'>Gerar link aqui</a>
-                  </div>
+                <NaoUnidade>
+                  <p>Este negócio não possui unidades</p> 
+                  <button onClick={() => history.push(`/negocio/${nome_negocio}/nova-unidade`)} className='botao-sucesso'>+ Criar Unidade</button>
+                </NaoUnidade>
+              }
 
-                  <div className={erros.contato ? 'campo-input contato contorno-erro': 'campo-input contato'}>
-                    <label>Contato*:</label>
-                    <InputMask mask="(99)9999-99999" placeholder='(00)0000-00000' value={unidade.contato} name='contato' onChange={pegarDados} autoComplete="none"/>
-                  </div>
+            </BoxLista> 
 
-                  <h5>Endereço</h5>
-
-                  <div className='cep'>
-
-                    <div className={erros.cep ? 'campo-input contorno-erro': 'campo-input'}>
-                      <label>Cep*:</label>
-                      <InputMask mask="99999-999" placeholder='00000-000' value={unidade.cep} name='cep' onChange={pegarDados} onBlur={buscarCep} autoComplete="none"/>
-                    </div>
-                    <p className='erro'>{erroCep}</p>
-
-                  </div>
-
-                  <div className='rua-numero'>
-                    <div className='campo-input rua'>
-                      <label>Rua*:</label>
-                      <input placeholder='Av. Brasil' value={endereco.logradouro} autoComplete="none" disabled/>
-                    </div>
-
-                    <div className={erros.numero ? 'campo-input numero contorno-erro': 'campo-input numero'}>
-                      <label>N°*:</label>
-                      <input placeholder='25' value={unidade.numero} name='numero' onChange={pegarDados} autoComplete="none"/>
-                    </div>
-                  </div>
-
-                  <div className='complemento-bairro'>
-                    <div className='campo-input complemento'>
-                      <label>Complemento:</label>
-                      <input placeholder='Ap 315' name='complemento' onChange={pegarDados} value={unidade.complemento} autoComplete="none"/>
-                    </div>
-
-                    <div className='campo-input bairro'>
-                      <label>Bairro*:</label>
-                      <input placeholder='Centro' value={endereco.bairro} autoComplete="none" disabled/>
-                    </div>
-                  </div>
-
-                  <div className='cidade-estado'>
-                    <div className='campo-input cidade'>
-                      <label>Cidade*:</label>
-                      <input placeholder='Belo Horizonte' value={endereco.localidade} autoComplete="none" disabled/>
-                    </div>
-
-                    <div className='campo-input estado'>
-                      <label>UF*:</label>
-                      <input placeholder='MG' value={endereco.uf} autoComplete="none" disabled/>
-                    </div>
-                  </div>
-                </div>
-
-                <p className='erro-final'>{erro}</p>
-
-                <div className='botao-salvar'>
-                  <button className='botao-sucesso' onClick={() => salvarUnidade(unidade.nome)}>Salvar</button>
-                </div>
-              </CriarUnidade>
-              :
-
-
-              <BoxLista>
-
-                <div className='nome-negocio'>
-                  <h1>{negocioUser[0].nome}</h1>
-                  <Link to={`/negocio/editar/${nome_negocio}`}>Editar Negócio</Link>
-                </div>
-
-
-                {unidadeNegocio.length !== 0 ?
-
-                <div className='titulo-lista'>
-
-                  <div className='titulo-botao'>
-                    <h2>Unidades</h2>
-                    <button onClick={() => history.push(`/negocio/${nome_negocio}/nova-unidade`)} className='botao-sucesso'>+ Criar unidade</button>
-                  </div>
-
-                
-
-                  <ListUnidades>
-                    {listUnidades}
-                  </ListUnidades> 
-
-                </div>
-                : 
-
-                  <NaoUnidade>
-                    <p>Este negócio não possui unidades</p> 
-                    <button onClick={() => history.push(`/negocio/nova-unidade`)} className='botao-sucesso'>+ Criar Unidade</button>
-                  </NaoUnidade>
-                }
-
-              </BoxLista> 
-
-            }
+            
         </div>}
 
       </App>

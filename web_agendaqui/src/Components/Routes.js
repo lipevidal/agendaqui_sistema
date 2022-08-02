@@ -9,17 +9,21 @@ import Home from '../Pages/Home';
 import Login from '../Pages/Login';
 import Perfil from '../Pages/Perfil';
 import RecuperarSenha from '../Pages/RecuperarSenha';
-import NovoNegocio from '../Pages/NovoNegocio';
+import NovoNegocio from '../Pages/Negocios/NovoNegocio';
 import { useDispatch, useSelector } from 'react-redux'
 import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
 import { getTodasUnidades } from '../store/Unidades/Unidades.fetch.actions';
 import store from '../store/store'
 import { DetalhesUser } from '../context/UserContext';
+import { addUser } from '../store/Users/Users.actions'
+import { getNegocios } from '../store/Negocios/Negocios.fetch.actions'
 import Loading from './Loading';
-import Negocios from '../Pages/Negocios';
-import MeuNegocio from '../Pages/MeuNegocio';
-import Unidades from '../Pages/Unidade';
-import EditarNegocio from '../Pages/EditarNegocio';
+import Negocios from '../Pages/Negocios/Negocios';
+import MeuNegocio from '../Pages/Negocios/MeuNegocio';
+import Unidades from '../Pages/Unidades/Unidade';
+import EditarNegocio from '../Pages/Negocios/EditarNegocio';
+import NovaUnidade from '../Pages/Unidades/NovaUnidade';
+import api from '../services/api';
 
 export default function Routes() {
   const dispatch = useDispatch()
@@ -28,8 +32,31 @@ export default function Routes() {
   
   useEffect(() => {
     if(token) {
+      setLoading(true)
       console.log('Token existe vou chamar a função getUser')
-      dispatch(getUser(token))
+      const body = {}
+      api.post('/api/v1/me', body, {
+        headers: {
+            'Accept' : 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+        }).then((res) => {
+            console.log('Busquei os dados do usuário do token e esta é a minha resposta')
+            console.log(res.data)
+            console.log('Vou guardar esses dados no store')
+            dispatch(addUser(res.data))
+            console.log('Vou chamar chamar a função get negócios passando o id:')
+            console.log(res.data.id)
+            console.log('E o token:')
+            console.log(token)
+            dispatch(getNegocios(res.data.id, token, res.data))
+        }).catch((err) => {
+            console.log(err)
+        }).finally(() => {
+            setLoading(false)
+        })
+      
     } else {
       console.log('Token não existe, não faço requisição')
       dispatch(getTodasUnidades())
@@ -43,6 +70,7 @@ export default function Routes() {
   return (
     <BrowserRouter>
         <Switch>
+            {loading && <Loading />}
             <Route exact path="/cadastro" component={Cadastro} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/recuperar-senha" component={RecuperarSenha} />
@@ -54,6 +82,7 @@ export default function Routes() {
             <PrivateRoute exact path="/novo-negocio" component={NovoNegocio} />
             <PrivateRoute exact path="/negocios" component={Negocios} />
             <PrivateRoute exact path="/negocio/:nome_negocio" component={MeuNegocio} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/nova-unidade" component={NovaUnidade} />
             <PrivateRoute exact path="/negocio/editar/:nome_negocio" component={EditarNegocio} />
             <PrivateRoute exact path="/negocio/:nome_negocio/:unidade" component={Unidades} />
             <Route exact path="/erro" component={Erro} />

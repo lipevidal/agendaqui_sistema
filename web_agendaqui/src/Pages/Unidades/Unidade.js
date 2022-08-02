@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import App from '../layouts/App';
+import App from '../../layouts/App';
 import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux'
 import axios from 'axios';
-import store from '../store/store';
-import IconeSetaDireita from '../imagens/icones/seta-direita.png'
 
 const ContainerUnidade = styled.div`
     background-color: #2d3d54;

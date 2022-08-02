@@ -22,9 +22,11 @@ export const getUser = (token) => {
             console.log(res.data.id)
             console.log('E o token:')
             console.log(token)
-            dispatch(getNegocios(res.data.id, token))
+            dispatch(getNegocios(res.data.id, token, res.data))
         }).catch((err) => {
             console.log(err)
+        }).finally(() => {
+            
         })
     }
 }

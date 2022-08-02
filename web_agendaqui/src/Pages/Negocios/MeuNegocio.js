@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import App from '../layouts/App';
+import App from '../../layouts/App';
 import styled from 'styled-components';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
 import InputMask from "react-input-mask";
-import { addUnidade } from '../store/Unidades/Unidades.actions'
-import { getTodasUnidades } from '../store/Unidades/Unidades.fetch.actions'
-import { getNegocios } from '../store/Negocios/Negocios.fetch.actions'
-import { getUser } from '../store/Users/Users.fetch.actions';
-import store from '../store/store';
-import IconeSetaDireita from '../imagens/icones/seta-direita.png'
-import IconeSetaEsquerda from '../imagens/icones/seta-esquerda.png'
-import api from '../services/api';
+import { addUnidade } from '../../store/Unidades/Unidades.actions'
+import { getTodasUnidades } from '../../store/Unidades/Unidades.fetch.actions'
+import { getNegocios } from '../../store/Negocios/Negocios.fetch.actions'
+import { getUser } from '../../store/Users/Users.fetch.actions';
+import store from '../../store/store';
+import IconeSetaEsquerda from '../../imagens/icones/seta-esquerda.png'
+import api from '../../services/api';
 
 const ContainerMeuNegocio = styled.div`
     background-color: #2d3d54;
@@ -237,8 +236,11 @@ const ListUnidades = styled.div`
   }
 `
 const NaoUnidade = styled.div`
+  width: 100%;
   margin: 30px 0;
   text-align: center;
+  border-top: 2px solid #ccc;
+  padding-top: 20px;
   button {
     margin: 15px 0;
   }
@@ -467,6 +469,7 @@ export default function MeuNegocio() {
         }
           
       }
+    
 
       const voltarTela = () => {
         setTelaEditarNegocio(false)
@@ -513,9 +516,7 @@ export default function MeuNegocio() {
             <Capa>
               <img src={`${urlBase}/storage/${negocioUser[0].logo}`}/>
             </Capa>
-
-
-          {/* Tela onde edita o negócio. É aberto só quando o usuário clica no botão */}    
+  
 
             {telaEditarNegocio ?
 
@@ -625,7 +626,7 @@ export default function MeuNegocio() {
 
                   <div className='titulo-botao'>
                     <h2>Unidades</h2>
-                    <button onClick={() => setTelaCriarUnidade(true)} className='botao-sucesso'>+ Criar unidade</button>
+                    <button onClick={() => history.push(`/negocio/${nome_negocio}/nova-unidade`)} className='botao-sucesso'>+ Criar unidade</button>
                   </div>
 
                 
@@ -639,7 +640,7 @@ export default function MeuNegocio() {
 
                   <NaoUnidade>
                     <p>Este negócio não possui unidades</p> 
-                    <button onClick={() => setTelaCriarUnidade(true)} className='botao-sucesso'>+ Criar Unidade</button>
+                    <button onClick={() => history.push(`/negocio/nova-unidade`)} className='botao-sucesso'>+ Criar Unidade</button>
                   </NaoUnidade>
                 }
 

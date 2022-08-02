@@ -168,6 +168,14 @@ code {
 .botao-padrao:hover {
   background-color: var(--cor-padrao-hover);
 }
+
+.botao-excluir {
+  background-color: #df484a;
+  border-radius: 10px;
+  padding: 5px 5px;
+  border: none;
+  color: white;
+}
 /************------------------****************/
 /*****Status*****************/
 .teste, .ativo, .atrasado, .inativo, .a-vencer {

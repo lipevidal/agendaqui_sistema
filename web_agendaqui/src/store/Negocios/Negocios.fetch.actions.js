@@ -1,4 +1,3 @@
-import Negocios from "../../Pages/Negocios";
 import api from "../../services/api";
 import store from '../store'
 import { addNegocios, addNegocio } from "./Negocios.actions";
@@ -7,7 +6,7 @@ import { getUnidades } from '../Unidades/Unidades.fetch.actions'
 const token = localStorage.getItem('token-agendaqui')
 const user = store.replaceReducer.user
 
-export const getNegocios = (idUser, token) => {
+export const getNegocios = (idUser, token, user) => {
     return (dispatch) => {
         api.get(`/api/v1/negocio`, {
         headers: {
@@ -18,9 +17,22 @@ export const getNegocios = (idUser, token) => {
         }).then((res) => {
             console.log('Dados da requisição getNegocios res.data')
             console.log(res.data)
+
+            //retorna somente os negócios que pertence ao usuário logado
             const dados = res.data.filter((negocio) => {
                 return negocio.user_id === idUser
             })
+
+            // let data = new Date();
+            // let dataFormatada = data.getFullYear() + '-' + ((data.getMonth() + 1)) + '-' + ((data.getDate() ))
+
+            // if(user.atualizar <= dataFormatada) {
+            //     console.log('atualizar data')
+            //     //verificar se excluir <= 
+            // } else {
+            //     console.log('não atualizar data')
+            // }
+            
             console.log('Vou guardar esses dados no store')
             dispatch(addNegocios(dados))
             dispatch(getUnidades(dados, token))

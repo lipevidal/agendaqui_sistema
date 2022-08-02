@@ -1,4 +1,3 @@
-import Negocios from "../../Pages/Negocios";
 import api from "../../services/api";
 import store from '../store'
 import { addUnidades, addTodasUnidades } from "./Unidades.actions";
@@ -18,19 +17,28 @@ export const getUnidades = (dadosNegocio, token) => {
             console.log('Dados da requisição getUnidades res.data')
             console.log(res.data)
 
+            //retorna todas as unidades do sistema
             const todoUnidades = res.data.map((unidade) => {
                 return unidade
             })
+
             console.log('Todas as unidades')
             console.log(todoUnidades)
             dispatch(addTodasUnidades(todoUnidades))
 
+            //retorna somente as unidades que pertence ao usuário logado
             const unidades = todoUnidades.filter((unidade) => {
                 const negocio = dadosNegocio.filter((negocio) => {
                     return negocio.id === unidade.negocio_id
                 })
                 return negocio
             })
+
+            if (!unidades.length) {
+                console.log('este usuário nao tem unidades')
+                //atualizar dadosNegocio.entrou pra hoje
+            } 
+
             console.log('Unidades')
             console.log(unidades)
             dispatch(addUnidades(unidades))

@@ -10,6 +10,7 @@ import { getNegocios } from '../../store/Negocios/Negocios.fetch.actions'
 import { getUser } from '../../store/Users/Users.fetch.actions';
 import store from '../../store/store';
 import IconeSetaEsquerda from '../../imagens/icones/seta-esquerda.png'
+import IconeConfig from '../../imagens/icones/settings-sliders.png'
 import api from '../../services/api';
 
 const ContainerMeuNegocio = styled.div`
@@ -36,6 +37,13 @@ const ContainerMeuNegocio = styled.div`
         object-fit: cover;
       }
     }
+    .box-config {
+      position: absolute;
+      top: 15px;
+      right: 10px;
+      z-index: 100;
+    }
+    
     button.seta {
       width: 40px;
       height: 40px;
@@ -95,7 +103,6 @@ const Capa = styled.div`
       }
     }
 `
-
 const BoxLista = styled.div`
     display: flex;
     flex-direction: column;
@@ -112,16 +119,26 @@ const BoxLista = styled.div`
     }
     .nome-negocio {
       margin-bottom: 10px;
-      text-align: center;
-      a {
-        font-size:0.8em;
-        background-color: orange;
-        cursor: pointer;
-        text-decoration: none;
-        color: black;
-        border: none;
-        padding: 5px;
-        border-radius: 3px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      height: 80px;
+    }
+    a.config {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      box-shadow: 0 0 5px 1px black;
+      img {
+        width: 30px;
+        height: 30px;
+        object-fit: cover;
       }
     }
     h1 {
@@ -237,7 +254,6 @@ const ListUnidades = styled.div`
 `
 const NaoUnidade = styled.div`
   width: 100%;
-  margin: 30px 0;
   text-align: center;
   border-top: 2px solid #ccc;
   padding-top: 20px;
@@ -315,8 +331,14 @@ export default function MeuNegocio() {
             <BoxLista>
 
               <div className='nome-negocio'>
+                <div className='box-config'>
+                  <Link to={`/negocio/${nome_negocio}/config`} className='config'>
+                    <img src={IconeConfig} />
+                  </Link>
+                  <p>Config</p>
+                </div>
                 <h1>{negocioUser[0].nome}</h1>
-                <Link to={`/negocio/editar/${nome_negocio}`}>Editar Negócio</Link>
+                {/* <Link to={`/negocio/editar/${nome_negocio}`}>Editar Negócio</Link> */}
               </div>
 
 

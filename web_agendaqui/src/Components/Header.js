@@ -84,6 +84,7 @@ text-decoration: none;
     display: flex;
     align-items: center;
     justify-content: space-evenly;
+    box-shadow: 0 -5px 10px 0.6px black;
     .mobile {
         display: flex;
     }

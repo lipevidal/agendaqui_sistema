@@ -11,6 +11,7 @@ import { getUser } from '../../store/Users/Users.fetch.actions';
 import store from '../../store/store';
 import IconeSetaDireita from '../../imagens/icones/seta-direita.png'
 import IconeSetaEsquerda from '../../imagens/icones/seta-esquerda.png'
+import IconeExcluir from '../../imagens/icones/trash.png'
 import api from '../../services/api';
 import { addNegocios } from '../../store/Negocios/Negocios.actions';
 import Loading from '../../Components/Loading';
@@ -40,12 +41,38 @@ const ContainerEditarNegocio = styled.div`
     }
   .erro {
     font-size: 0.8em;
-    margin-bottom: 10px;
     color: red;
   }
-  .botao-excluir {
+  .botao-sucesso {
+    margin: 8px;
+  }
+  .excluir {
     margin: 20px;
+    background-color: #141f3687;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 8px 0.8px black;
+    padding: 5px;
+    color: white;
+    display: flex;
+    align-items: center;
     cursor: pointer;
+    p {
+      margin: 5px;
+    }
+    .img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: red;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      img {
+        width: 60%;
+        height: 60%;
+      }
+    }
   }
   @media (max-width: 650px) {
       margin-top: calc(var(--altura-header) - 10px);
@@ -187,6 +214,7 @@ p {
     border-radius: 5px;
     border: none;
     color: white;
+    cursor: pointer;
   }
   .sim {
     background-color: #369a5d;
@@ -348,7 +376,7 @@ export default function EditarNegocio() {
         {negocioUser.length > 0&&
         <div className='center'>
             {loading && <Loading />}
-            <Link to={`/negocio/${nome_negocio}`} className='seta'>
+            <Link to={`/negocio/${nome_negocio}/config`} className='seta'>
                 <img src={IconeSetaEsquerda} />
             </Link>
 
@@ -398,7 +426,12 @@ export default function EditarNegocio() {
                 <p className='erro'>{erros.nome}</p>
                 <p className='erro'>{erros.categoria}</p>
                 <button className='botao-sucesso' onClick={atualizarNegocio}>Atualizar</button>
-                <button className='botao-excluir' onClick={() => setPopUp(true)}>Excluir Negócio</button>
+                <button className='excluir' onClick={() => setPopUp(true)}>
+                  <div className='img'>
+                    <img src={IconeExcluir}/>
+                  </div>
+                  <p>Excluir Negócio</p>
+                </button>
             
             </EdicaoNegocio>
             {popUp &&
@@ -408,7 +441,7 @@ export default function EditarNegocio() {
                     <button onClick={() => setPopUp(false)}>X</button>
                   </div>
                   {unidadeNegocio.length > 0 ?
-                    <p>Este negócio possui unidades, por isso não é possível excluí-lo</p>
+                    <p>Não é possível excluir pois este negócio possui unidades</p>
                   :
                   <div>
                     <p>Tem certeza que deseja excluir este negócio?</p>

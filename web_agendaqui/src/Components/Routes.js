@@ -24,6 +24,10 @@ import Unidades from '../Pages/Unidades/Unidade';
 import EditarNegocio from '../Pages/Negocios/EditarNegocio';
 import NovaUnidade from '../Pages/Unidades/NovaUnidade';
 import api from '../services/api';
+import EditarUnidade from '../Pages/Unidades/EditarUnidade';
+import ConfigUnidade from '../Pages/Unidades/ConfigUnidade';
+import EnderecoUnidade from '../Pages/Unidades/EnderecoUnidade';
+import ConfigNegocio from '../Pages/Negocios/ConfigNegocio';
 
 export default function Routes() {
   const dispatch = useDispatch()
@@ -82,9 +86,13 @@ export default function Routes() {
             <PrivateRoute exact path="/novo-negocio" component={NovoNegocio} />
             <PrivateRoute exact path="/negocios" component={Negocios} />
             <PrivateRoute exact path="/negocio/:nome_negocio" component={MeuNegocio} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/config" component={ConfigNegocio} />
             <PrivateRoute exact path="/negocio/:nome_negocio/nova-unidade" component={NovaUnidade} />
             <PrivateRoute exact path="/negocio/editar/:nome_negocio" component={EditarNegocio} />
             <PrivateRoute exact path="/negocio/:nome_negocio/:unidade" component={Unidades} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/editar" component={EditarUnidade} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/endereco" component={EnderecoUnidade} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/config" component={ConfigUnidade} />
             <Route exact path="/erro" component={Erro} />
         </Switch>
     </BrowserRouter>

@@ -84,8 +84,25 @@ class UnidadeController extends Controller
     {
         $unidade = $this->unidade->find($id);
         if($unidade === null) {
-            return response()->json(['erro' => 'O usuário não existe'], 400);
+            return response()->json(['erro' => 'A unidade não existe'], 400);
         }
+
+        if($request->method() === 'PATCH') {
+            
+            $regrasDinamicas = array();
+
+            foreach($unidade->rules() as $input => $regra) {
+                if(array_key_exists($input, $request->all())) {
+                    $regrasDinamicas[$input] = $regra;
+                }
+            } 
+
+            $request->validate($regrasDinamicas, $unidade->feedback());
+
+            $unidade->update($request->all());
+                return $unidade;
+        }
+
     }
 
     /**

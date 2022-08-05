@@ -34,7 +34,10 @@ export const getNegocios = (idUser, token, user) => {
             // }
             
             console.log('Vou guardar esses dados no store')
+            //Adiciono somente os negócios do usuário logado na store
             dispatch(addNegocios(dados))
+
+            //Chamo a requisição pra buscar as unidades
             dispatch(getUnidades(dados, token))
         }).catch((err) => {
             console.log(err)

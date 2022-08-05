@@ -6,10 +6,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import IconeSetaEsquerda from '../../imagens/icones/seta-esquerda.png'
 import InputMask from "react-input-mask";
 import api from '../../services/api';
+import Loading from '../../Components/Loading';
 import { addUnidade } from '../../store/Unidades/Unidades.actions'
-import { getTodasUnidades } from '../../store/Unidades/Unidades.fetch.actions'
+import { getTodasUnidades, getUnidades } from '../../store/Unidades/Unidades.fetch.actions'
 
-const ContainerNovaUnidade = styled.div`
+const ContainerEndereco = styled.div`
     background-color: #2d3d54;
     min-height: 100vh;
     .center {
@@ -58,7 +59,7 @@ const Capa = styled.div`
     }
 `
 
-const CriarUnidade = styled.div`
+const BoxEndereco = styled.div`
   max-width: 450px;
   width: 100%;
   display: flex;
@@ -68,10 +69,7 @@ const CriarUnidade = styled.div`
     justify-content: center;
     align-items: center;
     color: white;
-    margin: 10px;
-    h2 {
-      margin-left: -30px;
-    }
+    margin-top: 50px;
     button {
       cursor: pointer;
     }
@@ -178,12 +176,10 @@ export default function EnderecoUnidade() {
     const [erros, setErros] = useState({})
     const [erroCep, setErroCep] = useState('')
     const [erro, setErro] = useState('')
+    const [loading, setLoading] = useState(false)
     const [endereco, setEndereco] = useState({})
     let history = useHistory()
-    const [unidadee, setUnidade] = useState({
-        nome: '',
-        link_whatsapp: '',
-        contato: '',
+    const [unidadee, setUnidadee] = useState({
         cep: '',
         numero: '',
         complemento: ''
@@ -209,6 +205,11 @@ export default function EnderecoUnidade() {
         return unidade.negocio_id === negocioUser[0].id
     })
 
+    //retornar somente a unidade da página atual
+    const unidadeNegocio = unidadesNegocio.filter((uni) => {
+      return uni.nome === unidade
+    })
+
     console.log(unidadesNegocio)
 
 //    const list = negocioUser.map((unidade, index) => {
@@ -216,7 +217,7 @@ export default function EnderecoUnidade() {
 //    })
 
     const buscarCep = () => {
-        api.get(`https://viacep.com.br/ws/${unidade.cep}/json/`)
+        api.get(`https://viacep.com.br/ws/${unidadee.cep}/json/`)
         .then((res) => {
         console.log(res.data)
         if(res.data.erro) {
@@ -230,55 +231,59 @@ export default function EnderecoUnidade() {
         })
     }
 
-    const salvarUnidade = (nomeUnidade) => {
+    const salvarUnidade = () => {
+      setLoading(true)
         if(erroCep) {
           setErro('Digite um cep válido')
         } else {
-          let salvar = true
-          for (let uni of unidadesNegocio) {
-            if (uni.nome.toLowerCase()  === nomeUnidade.toLowerCase()) {
-              salvar = false
-              console.log('salvar é false')
-            }
-            console.log('salvar é true')
-          }
-
-          if (salvar) {
-            console.log(unidade)
-            const body = {
-              negocio_id: negocioUser[0].id,
-              nome: unidade.nome.toLowerCase(),
-              link_whatsapp: unidade.link_whatsapp.toLowerCase(),
-              contato: unidade.contato,
+          console.log(unidade)
+          let body = {}
+          if (endereco.cep) {
+            body = {
+              _method: 'patch',
               cep: endereco.cep,
               rua: endereco.logradouro,
-              numero: unidade.numero,
-              complemento: unidade.complemento.toLowerCase(),
               bairro: endereco.bairro,
               cidade: endereco.localidade,
               estado: endereco.uf,
             }
-            console.log(body)
-            api.post('/api/v1/unidade', body, {
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
-              }
-            })
-            .then((res) => {
-              console.log(res.data)
-              dispatch(addUnidade(res.data))
-              dispatch(getTodasUnidades())
-              setUnidade({nome: '', link_whatsapp: '', contato: '', cep: '', numero: '', complemento: ''})
-              history.push(`/negocio/${nome_negocio}`)
-            }).catch((err) => {
-              console.log(err.response.data.errors)
-              setErros(err.response.data.errors)
-              setErro('Preencha todos os campos obrigatórios')
-            })
+            if (unidadee.numero) {
+              body.numero = unidadee.numero
+            }
+            if (unidadee.complemento) {
+              body.complemento = unidadee.complemento.toLowerCase()
+            }
           } else {
-            setErro('Esta unidade já existe')
+            body = {
+              _method: 'patch'
+            }
+            if (unidadee.numero) {
+              body.numero = unidadee.numero
+            }
+            if (unidadee.complemento) {
+              body.complemento = unidadee.complemento.toLowerCase()
+            }
           }
+          console.log(body)
+          api.post(`/api/v1/unidade/${unidadeNegocio[0].id}`, body, {
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          .then((res) => {
+            console.log(res.data)
+            dispatch(getUnidades(negocios, token))
+            dispatch(getTodasUnidades())
+            setUnidadee({cep: '', numero: '', complemento: ''})
+            setEndereco({logradouro: '', bairro: '', localidade: '', uf: ''})
+          }).catch((err) => {
+            console.log(err.response.data.errors)
+            setErros(err.response.data.errors)
+            setErro('Preencha todos os campos obrigatórios')
+          }).finally(() => {
+            setLoading(false)
+          })
         }
           
       }
@@ -292,18 +297,19 @@ export default function EnderecoUnidade() {
         setErroCep('')
         setErro('')
         setErros({...erros, [e.target.name]: ''})
-        setUnidade({...unidade, [e.target.name]: e.target.value})
+        setUnidadee({...unidade, [e.target.name]: e.target.value})
       }
     
   return (
-    <ContainerNovaUnidade>
+    <ContainerEndereco>
       <App>
-        {negocioUser.length > 0 &&
+        {loading && <Loading />}
+        {unidadeNegocio.length > 0 &&
         <div className='center'>
             <Link to={`/negocio/${nome_negocio}/${unidade}/config`} className='seta'>
               <img src={IconeSetaEsquerda} />
             </Link>
-            <CriarUnidade>
+            <BoxEndereco>
                 <div className='topo'>
                   <h2>Endereço da Unidade</h2>
                 </div>
@@ -314,7 +320,7 @@ export default function EnderecoUnidade() {
 
                     <div className={erros.cep ? 'campo-input contorno-erro': 'campo-input'}>
                       <label>Cep*:</label>
-                      <InputMask mask="99999-999" placeholder='00000-000' value={unidadee.cep} name='cep' onChange={pegarDados} onBlur={buscarCep} autoComplete="none"/>
+                      <InputMask mask="99999-999" placeholder={unidadeNegocio[0].cep} value={unidadee.cep} name='cep' onChange={pegarDados} onBlur={buscarCep} autoComplete="none"/>
                     </div>
                     <p className='erro'>{erroCep}</p>
 
@@ -323,36 +329,36 @@ export default function EnderecoUnidade() {
                   <div className='rua-numero'>
                     <div className='campo-input rua'>
                       <label>Rua*:</label>
-                      <input placeholder='Av. Brasil' value={endereco.logradouro} autoComplete="none" disabled/>
+                      <input placeholder={unidadeNegocio[0].rua} value={endereco.logradouro} autoComplete="none" disabled/>
                     </div>
 
                     <div className={erros.numero ? 'campo-input numero contorno-erro': 'campo-input numero'}>
                       <label>N°*:</label>
-                      <input placeholder='25' value={unidadee.numero} name='numero' onChange={pegarDados} autoComplete="none"/>
+                      <input placeholder={unidadeNegocio[0].numero} value={unidadee.numero} name='numero' onChange={pegarDados} autoComplete="none"/>
                     </div>
                   </div>
 
                   <div className='complemento-bairro'>
                     <div className='campo-input complemento'>
                       <label>Complemento:</label>
-                      <input placeholder='Ap 315' name='complemento' onChange={pegarDados} value={unidadee.complemento} autoComplete="none"/>
+                      <input placeholder={unidadeNegocio[0].complemento} name='complemento' onChange={pegarDados} value={unidadee.complemento} autoComplete="none"/>
                     </div>
 
                     <div className='campo-input bairro'>
                       <label>Bairro*:</label>
-                      <input placeholder='Centro' value={endereco.bairro} autoComplete="none" disabled/>
+                      <input placeholder={unidadeNegocio[0].bairro} value={endereco.bairro} autoComplete="none" disabled/>
                     </div>
                   </div>
 
                   <div className='cidade-estado'>
                     <div className='campo-input cidade'>
                       <label>Cidade*:</label>
-                      <input placeholder='Belo Horizonte' value={endereco.localidade} autoComplete="none" disabled/>
+                      <input placeholder={unidadeNegocio[0].cidade} value={endereco.localidade} autoComplete="none" disabled/>
                     </div>
 
                     <div className='campo-input estado'>
                       <label>UF*:</label>
-                      <input placeholder='MG' value={endereco.uf} autoComplete="none" disabled/>
+                      <input placeholder={unidadeNegocio[0].estado} value={endereco.uf} autoComplete="none" disabled/>
                     </div>
                   </div>
                 </div>
@@ -360,11 +366,11 @@ export default function EnderecoUnidade() {
                 <p className='erro-final'>{erro}</p>
 
                 <div className='botao-salvar'>
-                  <button className='botao-sucesso' onClick={() => salvarUnidade(unidade.nome)}>Salvar</button>
+                  <button className='botao-sucesso' onClick={() => salvarUnidade()}>Salvar</button>
                 </div>
-            </CriarUnidade>
+            </BoxEndereco>
         </div>}
       </App>
-    </ContainerNovaUnidade>
+    </ContainerEndereco>
   );
 }

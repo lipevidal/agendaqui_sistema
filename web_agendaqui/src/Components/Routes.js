@@ -28,6 +28,8 @@ import EditarUnidade from '../Pages/Unidades/EditarUnidade';
 import ConfigUnidade from '../Pages/Unidades/ConfigUnidade';
 import EnderecoUnidade from '../Pages/Unidades/EnderecoUnidade';
 import ConfigNegocio from '../Pages/Negocios/ConfigNegocio';
+import Servicos from '../Pages/Servicos/Servicos';
+import NovoServico from '../Pages/Servicos/NovoServico';
 
 export default function Routes() {
   const dispatch = useDispatch()
@@ -49,11 +51,13 @@ export default function Routes() {
             console.log('Busquei os dados do usuário do token e esta é a minha resposta')
             console.log(res.data)
             console.log('Vou guardar esses dados no store')
+            //adiciono o usuario retornado na requisição no store
             dispatch(addUser(res.data))
             console.log('Vou chamar chamar a função get negócios passando o id:')
             console.log(res.data.id)
             console.log('E o token:')
             console.log(token)
+            //chamo a requisição pra buscar os negócios
             dispatch(getNegocios(res.data.id, token, res.data))
         }).catch((err) => {
             console.log(err)
@@ -90,6 +94,8 @@ export default function Routes() {
             <PrivateRoute exact path="/negocio/:nome_negocio/nova-unidade" component={NovaUnidade} />
             <PrivateRoute exact path="/negocio/editar/:nome_negocio" component={EditarNegocio} />
             <PrivateRoute exact path="/negocio/:nome_negocio/:unidade" component={Unidades} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/servicos" component={Servicos} />
+            <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/novo-servico" component={NovoServico} />
             <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/editar" component={EditarUnidade} />
             <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/endereco" component={EnderecoUnidade} />
             <PrivateRoute exact path="/negocio/:nome_negocio/:unidade/config" component={ConfigUnidade} />

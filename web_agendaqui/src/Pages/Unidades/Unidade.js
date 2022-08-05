@@ -161,7 +161,7 @@ export default function Unidades(props) {
                     <img src={IconeSetaDireita} className="seta-direita"/>
                 </Link>
 
-                <Link to={`/negocio/${nome_negocio}/${unidade}/config`}>
+                <Link to={`/negocio/${nome_negocio}/${unidade}/servicos`}>
                     <div className='box-img'>
                         <img src={IconeAnimadoServices}/>
                         <p>SERVIÇOS</p>

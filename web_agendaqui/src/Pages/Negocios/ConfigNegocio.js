@@ -354,7 +354,7 @@ export default function ConfigNegocio() {
                 <div className='img'>
                   <img src={IconeContato}/>
                 </div>
-                <p>Entre em contato</p>
+                <p>Entre em contato conosco</p>
               </Link>
             </Links>
         </div>}

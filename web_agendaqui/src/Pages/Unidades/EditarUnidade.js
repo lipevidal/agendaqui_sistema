@@ -5,11 +5,12 @@ import { Link, useParams, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
 import IconeSetaEsquerda from '../../imagens/icones/seta-esquerda.png'
 import InputMask from "react-input-mask";
+import Loading from '../../Components/Loading';
 import api from '../../services/api';
 import { addUnidade } from '../../store/Unidades/Unidades.actions'
-import { getTodasUnidades } from '../../store/Unidades/Unidades.fetch.actions'
+import { getTodasUnidades, getUnidades } from '../../store/Unidades/Unidades.fetch.actions'
 
-const ContainerNovaUnidade = styled.div`
+const ContainerEditarUnidade = styled.div`
     background-color: #2d3d54;
     min-height: 100vh;
     .center {
@@ -37,28 +38,7 @@ const ContainerNovaUnidade = styled.div`
     }
 `
 
-const Capa = styled.div`
-    max-width: 450px;
-    width: 100%;
-    height: 250px;
-    position: relative;
-    img {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-        opacity: 0.4;
-    }
-    h1 {
-        width: 100%;
-        position: absolute;
-        top: 0;
-        text-align: center;
-        color: white;
-        text-shadow: 0 0 5px black;
-    }
-`
-
-const CriarUnidade = styled.div`
+const BoxEditarUnidade = styled.div`
   max-width: 450px;
   width: 100%;
   display: flex;
@@ -68,10 +48,7 @@ const CriarUnidade = styled.div`
     justify-content: center;
     align-items: center;
     color: white;
-    margin: 10px;
-    h2 {
-      margin-left: -30px;
-    }
+    margin-top: 50px;
     button {
       cursor: pointer;
     }
@@ -94,7 +71,6 @@ const CriarUnidade = styled.div`
     color: red;
     text-align: center;
     font-size: 0.8em;
-    margin: 20px;
   }
   .contorno-erro {
     border: 1px solid red;
@@ -107,7 +83,8 @@ const CriarUnidade = styled.div`
   .botao-salvar {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    margin: 20px;
+
   }
   .campo-input {
     display: flex;
@@ -137,6 +114,9 @@ const CriarUnidade = styled.div`
     input.link-whatsapp{
       text-transform: lowercase;
     }
+    /* input::placeholder {
+      color: #ddd;
+    } */
   }
   .gerar-link {
     margin-left: 20px;
@@ -172,151 +152,131 @@ const CriarUnidade = styled.div`
 export default function EditarUnidade() {
     const dispatch = useDispatch()
     const token = localStorage.getItem('token-agendaqui')
-    const [urlBase, setUrlBase] = useState('http://localhost:8000')
     const { nome_negocio } = useParams()
     const { unidade } = useParams()
     const [erros, setErros] = useState({})
-    const [erroCep, setErroCep] = useState('')
     const [erro, setErro] = useState('')
-    const [endereco, setEndereco] = useState({})
+    const [loading, setLoading] = useState('')
     let history = useHistory()
-    const [unidadee, setUnidade] = useState({
+    const [unidadee, setUnidadee] = useState({
         nome: '',
         link_whatsapp: '',
-        contato: '',
-        cep: '',
-        numero: '',
-        complemento: ''
+        contato: ''
     })
 
     // const user = useSelector((state) => {
     //   return state.user
     // })
 
+    //retorna todos os negocios do usuário logado que esta na store
     const negocios = useSelector((state) => {
         return state.negocios
       })
 
+    //retorna somente o negocio da página atual
     const negocioUser = negocios.filter((negocio) => {
     return negocio.nome_da_pagina === nome_negocio
     })
 
+    //retorna todos as unidades do usuario que esta na store
     const unidades = useSelector((state) => {
         return state.unidades
     })
 
+    //retorna somente as unidades do negocio da página atual
     const unidadesNegocio = unidades.filter((unidade) => {
         return unidade.negocio_id === negocioUser[0].id
     })
 
-    console.log(unidadesNegocio)
+    //retornar somente a unidade da página atual
+    const unidadeNegocio = unidadesNegocio.filter((uni) => {
+      return uni.nome === unidade
+    })
 
-//    const list = negocioUser.map((unidade, index) => {
-//     return <p key={index}>{unidade}</p>
-//    })
-
-    const buscarCep = () => {
-        api.get(`https://viacep.com.br/ws/${unidade.cep}/json/`)
-        .then((res) => {
-        console.log(res.data)
-        if(res.data.erro) {
-            setErroCep('Cep inválido')
-        } else {
-            setEndereco(res.data)
-        }
-        }).catch((err) => {
-        console.log(err)
-        setErroCep('Cep inválido')
-        })
-    }
+    console.log(unidadeNegocio)
 
     const salvarUnidade = (nomeUnidade) => {
-        if(erroCep) {
-          setErro('Digite um cep válido')
-        } else {
-          let salvar = true
-          for (let uni of unidadesNegocio) {
-            if (uni.nome.toLowerCase()  === nomeUnidade.toLowerCase()) {
-              salvar = false
-              console.log('salvar é false')
-            }
-            console.log('salvar é true')
-          }
-
-          if (salvar) {
-            console.log(unidade)
-            const body = {
-              negocio_id: negocioUser[0].id,
-              nome: unidade.nome.toLowerCase(),
-              link_whatsapp: unidade.link_whatsapp.toLowerCase(),
-              contato: unidade.contato,
-              cep: endereco.cep,
-              rua: endereco.logradouro,
-              numero: unidade.numero,
-              complemento: unidade.complemento.toLowerCase(),
-              bairro: endereco.bairro,
-              cidade: endereco.localidade,
-              estado: endereco.uf,
-            }
-            console.log(body)
-            api.post('/api/v1/unidade', body, {
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
-              }
-            })
-            .then((res) => {
-              console.log(res.data)
-              dispatch(addUnidade(res.data))
-              dispatch(getTodasUnidades())
-              setUnidade({nome: '', link_whatsapp: '', contato: '', cep: '', numero: '', complemento: ''})
-              history.push(`/negocio/${nome_negocio}`)
-            }).catch((err) => {
-              console.log(err.response.data.errors)
-              setErros(err.response.data.errors)
-              setErro('Preencha todos os campos obrigatórios')
-            })
-          } else {
-            setErro('Esta unidade já existe')
-          }
+      setLoading(true)
+      let salvar = true
+      for (let uni of unidadesNegocio) {
+        if (uni.nome.toLowerCase()  === nomeUnidade.toLowerCase()) {
+          salvar = false
         }
+      }
+
+      if (salvar) {
+        console.log(unidade)
+        const body = {
+          _method: 'patch',
+        }
+        if (unidadee.nome) {
+          body.nome = unidadee.nome.toLowerCase()
+        }
+        if (unidadee.link_whatsapp) {
+          body.link_whatsapp = unidadee.link_whatsapp.toLowerCase()
+        }
+        if (unidadee.contato) {
+          body.contato = unidadee.contato
+        }
+        console.log(body)
+        api.post(`/api/v1/unidade/${unidadeNegocio[0].id}`, body, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then((res) => {
+          console.log(res.data)
+          dispatch(getUnidades(negocios, token))
+          dispatch(getTodasUnidades())
+          if (unidadee.nome) {
+            history.push(`/negocio/${nome_negocio}/${res.data.nome}/editar`)
+            document.location.reload(true);
+          }
+          setUnidadee({nome: '', link_whatsapp: '', contato: '', cep: '', numero: '', complemento: ''})
+          // history.push(`/negocio/${nome_negocio}`)
+        }).catch((err) => {
+          console.log(err.response.data)
+          setErros(err.response.data.errors)
+        }).finally(() => {
+          setLoading(false)
+        })
+      } else {
+        setErro('Esta unidade já existe')
+      }
           
       }
 
-    const voltarTela = () => {
-        history.push(`/negocio/${nome_negocio}`)
-    }
-
     const pegarDados = (e) => {
         e.preventDefault();
-        setErroCep('')
         setErro('')
         setErros({...erros, [e.target.name]: ''})
-        setUnidade({...unidade, [e.target.name]: e.target.value})
+        setUnidadee({...unidadee, [e.target.name]: e.target.value})
       }
     
   return (
-    <ContainerNovaUnidade>
+    <ContainerEditarUnidade>
       <App>
-        {negocioUser.length > 0 &&
+        {loading && <Loading />}
+        {unidadeNegocio.length > 0 &&
         <div className='center'>
             <Link to={`/negocio/${nome_negocio}/${unidade}/config`} className='seta'>
               <img src={IconeSetaEsquerda} />
             </Link>
-            <CriarUnidade>
+            <BoxEditarUnidade>
                 <div className='topo'>
-                  <h2>Unidade</h2>
+                  <h2>Editar Unidade</h2>
                 </div>
 
                 <div className='form'>
                   <div className={erros.nome ? 'campo-input contorno-erro': 'campo-input'}>
-                    <label>Nome*:</label>
-                    <input placeholder='Nome da unidade' value={unidadee.nome} name='nome' onChange={pegarDados} autoComplete="none" className='nome'/>
+                    <label>Nome*</label>
+                    <input placeholder={unidadeNegocio[0].nome} value={unidadee.nome} name='nome' onChange={pegarDados} autoComplete="none" className='nome'/>
                   </div>
 
                   <div className='campo-input'>
                     <label>Link do WhatsApp:</label>
-                    <input placeholder='https://linkdowhatsapp.com' value={unidadee.link_whatsapp.trim()} name='link_whatsapp' onChange={pegarDados} autoComplete="none" className='link-whatsapp'/>
+                    <input placeholder={unidadeNegocio[0].link_whatsapp} value={unidadee.link_whatsapp.trim()} name='link_whatsapp' onChange={pegarDados} autoComplete="none" className='link-whatsapp'/>
                   </div>
 
                   <div className='gerar-link'>
@@ -325,19 +285,22 @@ export default function EditarUnidade() {
 
                   <div className={erros.contato ? 'campo-input contato contorno-erro': 'campo-input contato'}>
                     <label>Contato*:</label>
-                    <InputMask mask="(99)9999-99999" placeholder='(00)0000-00000' value={unidadee.contato} name='contato' onChange={pegarDados} autoComplete="none"/>
+                    <InputMask mask="(99)9999-99999" placeholder={unidadeNegocio[0].contato} value={unidadee.contato} name='contato' onChange={pegarDados} autoComplete="none"/>
                   </div>
 
                 </div>
 
                 <p className='erro-final'>{erro}</p>
+                <p className='erro-final'>{erros.nome}</p>
+                <p className='erro-final'>{erros.link_whatsapp}</p>
+                <p className='erro-final'>{erros.contato}</p>
 
                 <div className='botao-salvar'>
-                  <button className='botao-sucesso' onClick={() => salvarUnidade(unidade.nome)}>Salvar</button>
+                  <button className='botao-sucesso' onClick={() => salvarUnidade(unidadee.nome)}>Salvar</button>
                 </div>
-            </CriarUnidade>
+            </BoxEditarUnidade>
         </div>}
       </App>
-    </ContainerNovaUnidade>
+    </ContainerEditarUnidade>
   );
 }

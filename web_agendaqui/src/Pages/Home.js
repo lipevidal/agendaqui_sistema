@@ -6,15 +6,19 @@ import App from '../layouts/App';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
 import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
-import IconeCoracao from '../imagens/icones/coracao.png'
-import IconeCoracaoColorido from '../imagens/icones/coracao-colorido.png'
+import IconeEstrela from '../imagens/icones/star-free-icon-font-cinza.png'
+import IconeEstrelaColorida from '../imagens/icones/star-free-icon-font-color.png'
 
 const ContainerHome = styled.div`
-  background-color: #2d3d54;
+  background-color: #F1F1F1;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 100px;
+  @media (max-width: 650px) {
+    margin-top: calc(var(--altura-header) - 10px);
+    min-height: calc(100vh - var(--altura-header));
+    padding-bottom: var(--altura-header);
+  }
 `
 
 const ListUnidades = styled.div`
@@ -23,10 +27,40 @@ flex-wrap: wrap;
 justify-content: center;
 padding: 10px;
 .logo-info {
+  width: 100%;
   display: flex;
   align-items: center;
   overflow: hidden;
   margin-right: 2px;
+}
+.info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  .horarios {
+      font-size: 1em;
+      margin: 5px 0;
+      span {
+        color: green;
+      }
+  }
+  .servicos {
+    display: flex;
+    overflow: auto;
+    .box-servico {
+      color: #2d6cea;
+      background-color: #a4bceb;
+      padding: 5px 10px;
+      border-radius: 30px;
+      font-size: 0.6em;
+      margin-right: 5px;
+      white-space: nowrap;
+    }
+  }
+  .servicos::-webkit-scrollbar {
+      display: none;
+  }
 }
 .link-unidades {
   display: flex;
@@ -39,18 +73,23 @@ padding: 10px;
   text-decoration: none;
   margin: 10px;
   padding: 10px;
-  border-radius: 10px;
-  border: 3px solid #141f36;
-  background-color: #141f3687;
+  border-radius: 15px;
+  box-shadow: 0 0 10px 0.2px #ccc;
+  background-color: #FFFFFF;
+  overflow: hidden;
+  &:hover {
+    background-color: #ececf6;
+  }
   .logo {
     background-color: white;
-    max-width: 40px;
-    min-width: 40px;
+    max-width: 60px;
+    min-width: 60px;
     width: 100%;
-    height: 40px;
-    border-radius: 50%;
+    height: 60px;
+    border-radius: 15px;
     padding: 2px;
-    margin-right: 5px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
     img {
       width: 100%;
       height: 100%;
@@ -58,8 +97,49 @@ padding: 10px;
       object-fit: cover;
     }
   }
-  h2 {
-    text-transform: capitalize;
+  .box-titulo-unidade {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: auto;
+    .titulo {
+      display: flex;
+      align-items: center;
+      h2 {
+        text-transform: capitalize;
+        color: black;
+        display: flex;
+        align-items: center;
+      }
+      span.unidade {
+        font-size: 0.7em;
+        text-transform: capitalize;
+        border: 2px solid red;
+        border-radius: 8px;
+        color: red;
+        padding: 5px;
+        margin: 0 5px;
+      }
+    }
+    .icone-favorito {
+      max-width: 30px;
+      min-width: 30px;
+      width: 100%;
+      height: 30px;
+      z-index: 300;
+      background-color: transparent;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
   }
   p {
     font-size: 0.6em;
@@ -71,21 +151,6 @@ padding: 10px;
     font-weight: 800;
     font-size: 1.4em;
   }
-  .icone-favorito {
-    max-width: 30px;
-    min-width: 30px;
-    width: 100%;
-    height: 30px;
-    z-index: 300;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
 }
 `
 
@@ -93,8 +158,17 @@ export default function Home() {
   const [urlBase, setUrlBase] = useState('http://localhost:8000')
   const [user, setUser] = useState({})
   const [form, setForm] = useState({nome: '', email: ''})
+  const [favorito, setFavorito] = useState(false)
   const dispatch = useDispatch()
   const token = localStorage.getItem('token-agendaqui')
+
+  const favoritar = () => {
+    if(favorito) {
+      setFavorito(false)
+    } else {
+      setFavorito(true)
+    }
+  }
 
   const pegarForm = (e) => {
     setForm({...form, [e.target.name]: e.target.value})
@@ -113,29 +187,42 @@ export default function Home() {
             <img src={`${urlBase}/storage/${unidade.negocio.logo}`}/>
           </div>
           <div className='info'>
-            <h2>{unidade.negocio.nome}</h2>
-            <p><strong className='negrito'>{unidade.nome}</strong> • {unidade.rua}, {unidade.numero} {unidade.complemento} <br/> {unidade.bairro}, {unidade.cidade} {unidade.estado}</p>
+            <div className='box-titulo-unidade'>
+              <div className='titulo'>
+                <h2>{unidade.negocio.nome}</h2>
+                <span className='unidade'>{unidade.nome}</span>
+              </div>
+              {token ?
+              <button className='icone-favorito' onClick={favoritar}>
+                <img src={favorito ? IconeEstrelaColorida : IconeEstrela}/>
+              </button>: ''}
+            </div>
+            <p className='horarios'>Horários disponíveis: <span>Hoje</span></p>
+            <div className='servicos'>
+                <div className='box-servico'>Salão de beleza</div>
+                <div className='box-servico'>Centro de estética</div>
+            </div>
+            {/* <p><strong className='negrito'>4♦</strong> • {unidade.rua}, {unidade.numero} {unidade.complemento} <br/> {unidade.bairro}, {unidade.cidade} {unidade.estado}</p> */}
           </div>
         </div>
-        {token ?
-        <button className='icone-favorito'>
-          <img src={IconeCoracao}/>
-        </button>: ''}
+        
       </Link>
     )
   })
 
   return (
     <ContainerHome>
+      <div className='center-home'>
       <App>
-        <div className='center'>
+        
           {unidades.length > 0 &&
           <ListUnidades>
             {listUnidades}
             <i className="fi fi-rr-envelope"></i>
           </ListUnidades>}
-        </div>
+        
       </App>
+      </div>
     </ContainerHome>
   );
 }

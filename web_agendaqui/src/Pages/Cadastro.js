@@ -12,62 +12,39 @@ const iconeSetaVoltar = <FontAwesomeIcon icon={faArrowLeftLong} className='i-set
 
 
 const ContainerCadastro = styled.div`
-    background-color: var(--cor-bg-escura);
-    height: 100vh;
-    color: var(--cor-texto-branca);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    .icone {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      text-align: left;
-      .i-seta {
-        color: var(--cor-texto-branca);
-        font-size: 2em;
-      }
-    }
-    .form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .boxCodigo {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        p {
-            text-align: center;
-        }
-        input {
-            width: 100px;
-            margin-top: 20px;
-            font-size: 1.1em;
-            text-align: center;
-            padding: 10px 15px;
-            letter-spacing: 2px;
-            background-color: var(--cor-bg-clara);
-            border-radius: 10px;
-            outline: none;
-            color: var(--cor-texto-branca);
-            border: none;
-        }
-    }
-    .form {
-        text-align: center;
-    }
-    .erro-texto {
-      margin-bottom: 15px;
-      margin-left: 8px;
-    }
-    .label-float {
-      input {
-        width: 280px;
-      }
-    }
+background-color: #141F36;
+min-height: 100vh;
+h1 {
+  text-align: center;
+  color: white;
+}
+.form-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.form {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px;
+}
+.nome-sobenome, .telefone-email {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.box-erro {
+  text-align: center;
+}
+input {
+  margin: 10px;
+}
+.botao-sucesso {
+  margin: 20px;
+}
 `
 
 export default function Cadastro(props) {
@@ -213,13 +190,21 @@ export default function Cadastro(props) {
           : 
           <div className='form slide-in-fwd-center'>
             <h1>CADASTRE-SE</h1>
-            <div className='box-inputs'>
-              <div className="label-float">
+
+            <div className='form-inputs'>
+              <div className="label-float nome">
                 <input className='primeira-maiuscula' value={nome} onChange={pegarNome} placeholder=" " autoComplete='none' required/>
                 <label>Nome</label>
               </div>
               <p className='erro-texto'>{erroNome}</p>
 
+              <div className="label-float sobrenome">
+                <input className='primeira-maiuscula' value={nome} onChange={pegarNome} placeholder=" " autoComplete='none' required/>
+                <label>Sobrenome</label>
+              </div>
+              <p className='erro-texto'>{erroNome}</p>
+
+              
               <div className="label-float">
                 <InputMask mask="(99)99999-9999" value={telefone} onChange={pegarTelefone} placeholder=" " autoComplete='none' required/>
                 <label>Telefone</label>
@@ -229,23 +214,27 @@ export default function Cadastro(props) {
               <div className="label-float">
                 <input className='minusculo' value={email.trim()} onChange={pegarEmail} placeholder=" " autoComplete='none' required/>
                 <label>Email</label>
-              </div>
+              </div>  
               <p className='erro-texto'>{erroEmail}</p>
 
               <div className="label-float">
                 <input type="password" value={senha} onChange={pegarSenha} placeholder=" " autoComplete='none' required/>
                 <label>Senha</label>
               </div>
-              <p className='erro-texto'>{erroSenha}</p>
+              <p className='erro-texto'>{mensagemErro}</p>
 
               <div className="label-float">
                 <input type="password" value={repitaSenha} onChange={pegarRepitaSenha} placeholder=" " autoComplete='none' required/>
                 <label>Repita a senha</label>
               </div>
               <p className='erro-texto'>{mensagemErro}</p>
-              
             </div>
-            <button className='botao-sucesso' onClick={EnviarCodigo}>Enviar</button>
+
+
+            
+            <div className='box-erro'>
+              <button className='botao-sucesso' onClick={EnviarCodigo}>Enviar</button>
+            </div>
           </div>
         }
       </div>

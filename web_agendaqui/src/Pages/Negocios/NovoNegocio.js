@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import api from "../services/api";
-import App from '../layouts/App';
+import api from "../../services/api";
+import App from '../../layouts/App';
 import styled from 'styled-components';
-import ImagemPadrao from '../imagens/perfilneutra.jpg'
-import IconeSetaEsquerda from '../imagens/icones/seta-esquerda.png'
+import ImagemPadrao from '../../imagens/perfilneutra.jpg'
+import IconeSetaEsquerda from '../../imagens/icones/seta-esquerda.png'
+import Loading from '../../Components/Loading'
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux'
-import { addNegocios, addNegocio } from "../store/Negocios/Negocios.actions";
+import { addNegocios, addNegocio } from "../../store/Negocios/Negocios.actions";
 import { Link } from 'react-router-dom';
-import { postNegocios } from '../store/Negocios/Negocios.fetch.actions';
 
 const ContainerNovoNegocio = styled.div`
     background-color: #2d3d54;
@@ -115,6 +115,7 @@ export default function NovoNegocio(props) {
     const [erroCategoria, setErroCategoria] = useState('')
     const [nomePagina, setNomePagina] = useState('')
     const [erroNomePagina, setErroNomePagina] = useState('')
+    const [loading, setLoading] = useState(false)
     const [logo, setLogo] = useState('')
     const [logoDB, setLogoDB] = useState('')
     const [erroLogo, setErroLogo] = useState('')
@@ -141,6 +142,7 @@ export default function NovoNegocio(props) {
         }
 
         if (salvar) {
+            setLoading(true)
             buscarDados()
             let formData = new FormData();
             formData.append('user_id', userId)
@@ -165,6 +167,8 @@ export default function NovoNegocio(props) {
                 setErroNomeNegocio(err.response.data.errors.nome)
                 setErroNomePagina(err.response.data.errors.nome_da_pagina)
                 setErroLogo(err.response.data.errors.logo)
+            }).finally(() => {
+                setLoading(false)
             })
 
         } else {
@@ -218,6 +222,7 @@ export default function NovoNegocio(props) {
     <ContainerNovoNegocio>
         <App>
             <div className='center'>
+                {loading && <Loading />}
                 <div className='form'>
                     <div className='voltar-titulo'>
                         <Link to={`/negocios`} className='seta'>

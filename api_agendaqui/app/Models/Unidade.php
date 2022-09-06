@@ -27,6 +27,7 @@ class Unidade extends Model
         'cidade',
         'estado',
         'status',
+        'atualizar',
         'vencimento',
     ];
 
@@ -36,6 +37,7 @@ class Unidade extends Model
             'nome' => 'required|min:2',
             'contato' => 'required|min:10',
             'cep' => 'required|min:8',
+            'numero' => 'required'
         ];
     }
 

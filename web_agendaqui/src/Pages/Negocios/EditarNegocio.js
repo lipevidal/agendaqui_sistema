@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import App from '../layouts/App';
+import App from '../../layouts/App';
 import styled from 'styled-components';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'
 import InputMask from "react-input-mask";
-import { addUnidade } from '../store/Unidades/Unidades.actions'
-import { getTodasUnidades } from '../store/Unidades/Unidades.fetch.actions'
-import { getNegocios } from '../store/Negocios/Negocios.fetch.actions'
-import { getUser } from '../store/Users/Users.fetch.actions';
-import store from '../store/store';
-import IconeSetaDireita from '../imagens/icones/seta-direita.png'
-import IconeSetaEsquerda from '../imagens/icones/seta-esquerda.png'
-import IconeConfig from '../imagens/icones/config.png'
-import api from '../services/api';
+import { addUnidade } from '../../store/Unidades/Unidades.actions'
+import { getTodasUnidades } from '../../store/Unidades/Unidades.fetch.actions'
+import { getNegocios } from '../../store/Negocios/Negocios.fetch.actions'
+import { getUser } from '../../store/Users/Users.fetch.actions';
+import store from '../../store/store';
+import IconeSetaDireita from '../../imagens/icones/seta-direita.png'
+import IconeSetaEsquerda from '../../imagens/icones/seta-esquerda.png'
+import IconeExcluir from '../../imagens/icones/trash.png'
+import api from '../../services/api';
+import { addNegocios } from '../../store/Negocios/Negocios.actions';
+import Loading from '../../Components/Loading';
 
 const ContainerEditarNegocio = styled.div`
   background-color: #2d3d54;
@@ -39,8 +41,38 @@ const ContainerEditarNegocio = styled.div`
     }
   .erro {
     font-size: 0.8em;
-    margin-bottom: 10px;
     color: red;
+  }
+  .botao-sucesso {
+    margin: 8px;
+  }
+  .excluir {
+    margin: 20px;
+    background-color: #141f3687;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 8px 0.8px black;
+    padding: 5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    p {
+      margin: 5px;
+    }
+    .img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: red;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      img {
+        width: 60%;
+        height: 60%;
+      }
+    }
   }
   @media (max-width: 650px) {
       margin-top: calc(var(--altura-header) - 10px);
@@ -140,6 +172,58 @@ const FormEdicao = styled.div`
     }
   }
 `
+const PopUp = styled.div`
+width: 100%;
+height: 100vh;
+background-color: rgba(0, 0, 0, 0.8);
+position: fixed;
+top: 0;
+left: 0;
+z-index: 10000;
+display: flex;
+justify-content: center;
+align-items: center;
+.box-popup {
+  width: 280px;
+  background-color: white;
+  border-radius: 10px;
+  padding-bottom: 10px;
+}
+.btn {
+  text-align: right;
+  padding: 10px;
+  button {
+    color: red;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+  }
+}
+p {
+  color: black;
+  padding: 10px;
+  text-align: center;
+}
+.botoes {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  button {
+    margin: 10px;
+    padding: 3px 5px;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    cursor: pointer;
+  }
+  .sim {
+    background-color: #369a5d;
+  }
+  .nao {
+    background-color: #df484a;
+  }
+}
+`
 
 export default function EditarNegocio() {
     const dispatch = useDispatch()
@@ -151,9 +235,11 @@ export default function EditarNegocio() {
     const [imagem, setImagem] = useState('')
     const [nome, setNome] = useState('')
     const [endereco, setEndereco] = useState({})
+    const [loading, setLoading] = useState(false)
     const [erroCep, setErroCep] = useState('')
     const [erro, setErro] = useState('')
     const [erros, setErros] = useState({})
+    const [popUp, setPopUp] = useState(false)
     const [unidade, setUnidade] = useState({
       nome: '',
       link_whatsapp: '',
@@ -176,7 +262,7 @@ export default function EditarNegocio() {
         return state.user
       })
 
-      //retorna todos os negocios do usuário que esta na store
+      //retorna todos os negocios do usuário logado que esta na store
       const negocios = useSelector((state) => {
         return state.negocios
       })
@@ -248,6 +334,28 @@ export default function EditarNegocio() {
         }
       }
 
+      const excluirNegocio = () => {
+        setLoading(true)
+        api.delete(`/api/v1/negocio/${negocioUser[0].id}`, {
+          headers: {
+              'Accept' : 'application/json',
+              'Authorization': `Bearer ${token}`
+          }
+          }).then((res) => {
+              const negociosAtualizados = negocios.filter((negocio) => {
+                return negocio.id !== negocioUser[0].id
+              })
+              dispatch(addNegocios(negociosAtualizados))
+              history.push('/negocios')
+          }).catch((err) => {
+              console.log(err.response.data)
+              setErros(err.response.data.errors)
+              //setErroNome(err.response.data.errors.nome)
+          }).finally(() => {
+            setLoading(false)
+        })
+      }
+
       const clicarImg = () => {
         let file = document.getElementById('inputImg')
         file.click();
@@ -267,8 +375,8 @@ export default function EditarNegocio() {
       <App>
         {negocioUser.length > 0&&
         <div className='center'>
-
-            <Link to={`/negocio/${nome_negocio}`} className='seta'>
+            {loading && <Loading />}
+            <Link to={`/negocio/${nome_negocio}/config`} className='seta'>
                 <img src={IconeSetaEsquerda} />
             </Link>
 
@@ -318,8 +426,32 @@ export default function EditarNegocio() {
                 <p className='erro'>{erros.nome}</p>
                 <p className='erro'>{erros.categoria}</p>
                 <button className='botao-sucesso' onClick={atualizarNegocio}>Atualizar</button>
+                <button className='excluir' onClick={() => setPopUp(true)}>
+                  <div className='img'>
+                    <img src={IconeExcluir}/>
+                  </div>
+                  <p>Excluir Negócio</p>
+                </button>
             
             </EdicaoNegocio>
+            {popUp &&
+            <PopUp>
+                <div className='box-popup'>
+                  <div className='btn'>
+                    <button onClick={() => setPopUp(false)}>X</button>
+                  </div>
+                  {unidadeNegocio.length > 0 ?
+                    <p>Não é possível excluir pois este negócio possui unidades</p>
+                  :
+                  <div>
+                    <p>Tem certeza que deseja excluir este negócio?</p>
+                    <div className='botoes'>
+                      <button className='sim' onClick={excluirNegocio}>Sim</button>
+                      <button className='nao' onClick={() => setPopUp(false)}>Nao</button>
+                    </div>
+                  </div>}
+                </div>
+            </PopUp>}
         </div>}
       </App>
     </ContainerEditarNegocio>

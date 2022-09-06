@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import Negocios from '../Pages/Negocios';
+import Negocios from '../Pages/Negocios/Negocios';
 import Logo_agendaqui_laranja from '../imagens/logo_agendaqui/logo-agendaqui-laranja.png'
 import FotoPerfilPadrao from '../imagens/perfilneutra.jpg'
 import IconeSino from '../imagens/icones/bell.png'

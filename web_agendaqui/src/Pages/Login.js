@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import Logo_agendaqui_laranja from '../imagens/logo_agendaqui/logo-agendaqui-laranja.png'
+import IconeVerSenha from '../imagens/icones/eye.png'
+import IconeNaoVerSenha from '../imagens/icones/eye-crossed.png'
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
 import { deleteFoto, getUser, newPassword, updateTelefone, updateUser } from '../store/Users/Users.fetch.actions';
@@ -55,6 +57,24 @@ const Form = styled.div`
   .link {
     font-size: 0.9em;
   }
+  .label-float {
+    position: relative;
+    button {
+      position: absolute;
+      background-color: transparent;
+      border: none;
+      right: 15px;
+      bottom: 18px;
+      width: 20px;
+      width: -15px;
+      cursor: pointer;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
 `
 
 export default function Login(props) {
@@ -63,6 +83,7 @@ export default function Login(props) {
     const [senha, setSenha] = useState('');
     const [erro, setErro] = useState('');
     const [loading, setLoading] = useState(false)
+    const [verSenha, setVerSenha] = useState(false)
 
     const Entrar = () => {
       setLoading(true)
@@ -118,8 +139,17 @@ export default function Login(props) {
                 </div>
                 <br/>
                 <div className="label-float">
-                    <input type="password" placeholder=" " value={senha} onChange={pegarSenha} autoComplete='none' required/>
+                    <input type={!verSenha ? 'text' : 'password'} placeholder=" " value={senha} onChange={pegarSenha} autoComplete='none' required/>
                     <label>Senha</label>
+                    {!verSenha ? 
+                      <button onClick={() => setVerSenha(true)}>
+                        <img src={IconeVerSenha}/>
+                      </button> 
+                      : 
+                      <button onClick={() => setVerSenha(false)}>
+                        <img src={IconeNaoVerSenha}/>
+                      </button>
+                    }
                 </div>
                 <p className='erro-texto'>{erro}</p>
                 

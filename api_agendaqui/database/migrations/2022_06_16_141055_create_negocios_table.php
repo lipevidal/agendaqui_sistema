@@ -20,8 +20,9 @@ class CreateNegociosTable extends Migration
             $table->string('logo');
             $table->string('categoria');
             $table->string('nome_da_pagina');
-            $table->integer('dias_inativos');
             $table->integer('codigo_afiliado');
+            $table->date('entrou');
+            $table->date('excluir');
             $table->timestamps();
         });
     }

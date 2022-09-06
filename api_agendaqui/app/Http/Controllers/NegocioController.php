@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Negocio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class NegocioController extends Controller
 {
@@ -42,6 +43,7 @@ class NegocioController extends Controller
      */
     public function store(Request $request)
     {
+        $data = date('Y/m/d');
         $request->validate($this->negocio->rules(), $this->negocio->feedback());
         $imagem = $request->file('logo');
         $imagem_urn = $imagem->store('imagens/logo', 'public');
@@ -52,7 +54,8 @@ class NegocioController extends Controller
             'categoria' => $request->categoria,
             'nome_da_pagina' => $request->nome_da_pagina,
             'codigo_afiliado'=> rand(11111111, 99999999),
-            'dias_inativos' => 0
+            'entrou' => $data,
+            'excluir'=> date('Y/m/d', strtotime("+30 days",strtotime($data))),
         ]);
 
         return $negocio;
@@ -79,7 +82,62 @@ class NegocioController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $negocio = $this->negocio->find($id);
+
+        if($negocio === null) {
+            return response()->json(['erro' => 'O usuário não existe'], 400);
+        }
+
+        if($request->method() === 'PATCH') {
+            
+            $regrasDinamicas = array();
+
+            foreach($negocio->rules() as $input => $regra) {
+                if(array_key_exists($input, $request->all())) {
+                    $regrasDinamicas[$input] = $regra;
+                }
+            } 
+
+            $request->validate($regrasDinamicas, $negocio->feedback());
+
+            if($request->file('logo')) {
+
+                Storage::disk('public')->delete($negocio->logo);
+
+                $imagem = $request->file('logo');
+                $imagem_urn = $imagem->store('imagens/logo', 'public');
+                $negocio->update([
+                    'logo' => $imagem_urn
+                ]);
+
+                if($request->nome) {
+                    $negocio->update([
+                        'nome' => $request->nome
+                    ]);
+                }
+
+                if($request->categoria) {
+                    $negocio->update([
+                        'categoria' => $request->categoria
+                    ]);
+                }
+
+                if($request->nome_da_pagina) {
+                    $negocio->update([
+                        'nome_da_pagina' => $request->nome_da_pagina
+                    ]);
+                }
+
+
+                return $negocio;
+
+            } else {
+                $negocio->update($request->all());
+                return $negocio;
+            }
+            
+
+        }
     }
 
     /**
@@ -90,6 +148,8 @@ class NegocioController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $negocio = $this->negocio->find($id);
+        $negocio->delete();
+        return response()->json(['sucesso' => 'O negócio foi removido com sucesso']);
     }
 }
